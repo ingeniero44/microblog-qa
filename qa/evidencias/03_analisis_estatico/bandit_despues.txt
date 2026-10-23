@@ -1,0 +1,153 @@
+Run started:2026-10-22 00:50:30.335543+00:00
+
+Test results:
+>> Issue: [B404:blacklist] Consider possible security implications associated with the subprocess module.
+   Severity: Low   Confidence: High
+   CWE: CWE-78 (https://cwe.mitre.org/data/definitions/78.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/blacklists/blacklist_imports.html#b404-import-subprocess
+   Location: app/cli.py:3:0
+2	import re
+3	import subprocess
+4	from flask import Blueprint
+
+--------------------------------------------------
+>> Issue: [B607:start_process_with_partial_path] Starting a process with a partial executable path
+   Severity: Low   Confidence: High
+   CWE: CWE-78 (https://cwe.mitre.org/data/definitions/78.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b607_start_process_with_partial_path.html
+   Location: app/cli.py:22:7
+21	        raise click.BadParameter('invalid language code')
+22	    if subprocess.run(['pybabel', 'extract', '-F', 'babel.cfg', '-k', '_l',
+23	                       '-o', 'messages.pot', '.']).returncode:
+24	        raise RuntimeError('extract command failed')
+
+--------------------------------------------------
+>> Issue: [B603:subprocess_without_shell_equals_true] subprocess call - check for execution of untrusted input.
+   Severity: Low   Confidence: High
+   CWE: CWE-78 (https://cwe.mitre.org/data/definitions/78.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b603_subprocess_without_shell_equals_true.html
+   Location: app/cli.py:22:7
+21	        raise click.BadParameter('invalid language code')
+22	    if subprocess.run(['pybabel', 'extract', '-F', 'babel.cfg', '-k', '_l',
+23	                       '-o', 'messages.pot', '.']).returncode:
+24	        raise RuntimeError('extract command failed')
+
+--------------------------------------------------
+>> Issue: [B607:start_process_with_partial_path] Starting a process with a partial executable path
+   Severity: Low   Confidence: High
+   CWE: CWE-78 (https://cwe.mitre.org/data/definitions/78.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b607_start_process_with_partial_path.html
+   Location: app/cli.py:25:7
+24	        raise RuntimeError('extract command failed')
+25	    if subprocess.run(['pybabel', 'init', '-i', 'messages.pot',
+26	                       '-d', 'app/translations', '-l', lang]).returncode:
+27	        raise RuntimeError('init command failed')
+
+--------------------------------------------------
+>> Issue: [B603:subprocess_without_shell_equals_true] subprocess call - check for execution of untrusted input.
+   Severity: Low   Confidence: High
+   CWE: CWE-78 (https://cwe.mitre.org/data/definitions/78.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b603_subprocess_without_shell_equals_true.html
+   Location: app/cli.py:25:7
+24	        raise RuntimeError('extract command failed')
+25	    if subprocess.run(['pybabel', 'init', '-i', 'messages.pot',
+26	                       '-d', 'app/translations', '-l', lang]).returncode:
+27	        raise RuntimeError('init command failed')
+
+--------------------------------------------------
+>> Issue: [B607:start_process_with_partial_path] Starting a process with a partial executable path
+   Severity: Low   Confidence: High
+   CWE: CWE-78 (https://cwe.mitre.org/data/definitions/78.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b607_start_process_with_partial_path.html
+   Location: app/cli.py:34:7
+33	    """Update all languages."""
+34	    if subprocess.run(['pybabel', 'extract', '-F', 'babel.cfg', '-k', '_l',
+35	                       '-o', 'messages.pot', '.']).returncode:
+36	        raise RuntimeError('extract command failed')
+
+--------------------------------------------------
+>> Issue: [B603:subprocess_without_shell_equals_true] subprocess call - check for execution of untrusted input.
+   Severity: Low   Confidence: High
+   CWE: CWE-78 (https://cwe.mitre.org/data/definitions/78.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b603_subprocess_without_shell_equals_true.html
+   Location: app/cli.py:34:7
+33	    """Update all languages."""
+34	    if subprocess.run(['pybabel', 'extract', '-F', 'babel.cfg', '-k', '_l',
+35	                       '-o', 'messages.pot', '.']).returncode:
+36	        raise RuntimeError('extract command failed')
+
+--------------------------------------------------
+>> Issue: [B607:start_process_with_partial_path] Starting a process with a partial executable path
+   Severity: Low   Confidence: High
+   CWE: CWE-78 (https://cwe.mitre.org/data/definitions/78.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b607_start_process_with_partial_path.html
+   Location: app/cli.py:37:7
+36	        raise RuntimeError('extract command failed')
+37	    if subprocess.run(['pybabel', 'update', '-i', 'messages.pot',
+38	                       '-d', 'app/translations']).returncode:
+39	        raise RuntimeError('update command failed')
+
+--------------------------------------------------
+>> Issue: [B603:subprocess_without_shell_equals_true] subprocess call - check for execution of untrusted input.
+   Severity: Low   Confidence: High
+   CWE: CWE-78 (https://cwe.mitre.org/data/definitions/78.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b603_subprocess_without_shell_equals_true.html
+   Location: app/cli.py:37:7
+36	        raise RuntimeError('extract command failed')
+37	    if subprocess.run(['pybabel', 'update', '-i', 'messages.pot',
+38	                       '-d', 'app/translations']).returncode:
+39	        raise RuntimeError('update command failed')
+
+--------------------------------------------------
+>> Issue: [B607:start_process_with_partial_path] Starting a process with a partial executable path
+   Severity: Low   Confidence: High
+   CWE: CWE-78 (https://cwe.mitre.org/data/definitions/78.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b607_start_process_with_partial_path.html
+   Location: app/cli.py:46:7
+45	    """Compile all languages."""
+46	    if subprocess.run(['pybabel', 'compile', '-d', 'app/translations']).returncode:
+47	        raise RuntimeError('compile command failed')
+
+--------------------------------------------------
+>> Issue: [B603:subprocess_without_shell_equals_true] subprocess call - check for execution of untrusted input.
+   Severity: Low   Confidence: High
+   CWE: CWE-78 (https://cwe.mitre.org/data/definitions/78.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b603_subprocess_without_shell_equals_true.html
+   Location: app/cli.py:46:7
+45	    """Compile all languages."""
+46	    if subprocess.run(['pybabel', 'compile', '-d', 'app/translations']).returncode:
+47	        raise RuntimeError('compile command failed')
+
+--------------------------------------------------
+>> Issue: [B113:request_without_timeout] Call to requests without timeout
+   Severity: Medium   Confidence: Low
+   CWE: CWE-400 (https://cwe.mitre.org/data/definitions/400.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b113_request_without_timeout.html
+   Location: app/translate.py:14:8
+13	    }
+14	    r = requests.post(
+15	        'https://api.cognitive.microsofttranslator.com'
+16	        '/translate?api-version=3.0&from={}&to={}'.format(
+17	            source_language, dest_language), headers=auth, json=[
+18	                {'Text': text}])
+19	    if r.status_code != 200:
+
+--------------------------------------------------
+
+Code scanned:
+	Total lines of code: 1120
+	Total lines skipped (#nosec): 0
+	Total potential issues skipped due to specifically being disabled (e.g., #nosec BXXX): 0
+
+Run metrics:
+	Total issues (by severity):
+		Undefined: 0
+		Low: 11
+		Medium: 1
+		High: 0
+	Total issues (by confidence):
+		Undefined: 0
+		Low: 1
+		Medium: 0
+		High: 11
+Files skipped (0):

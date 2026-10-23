@@ -1,0 +1,60 @@
+From 993a53d04c057466b7f542ba7e380e4896b9da54 Mon Sep 17 00:00:00 2001
+From: Equipo QA <qa@example.com>
+Date: Thu, 22 Oct 2026 00:51:07 +0000
+Subject: [PATCH 08/10] ci: pipeline GitHub Actions con pruebas, cobertura,
+ bandit y pip-audit
+
+---
+ .github/workflows/ci.yml | 40 ++++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 40 insertions(+)
+ create mode 100644 .github/workflows/ci.yml
+
+diff --git a/.github/workflows/ci.yml b/.github/workflows/ci.yml
+new file mode 100644
+index 0000000..0f068ab
+--- /dev/null
++++ b/.github/workflows/ci.yml
+@@ -0,0 +1,40 @@
++name: CI
++on:
++  push:
++    branches: [main, qa/**]
++  pull_request:
++    branches: [main]
++
++jobs:
++  build-test:
++    runs-on: ubuntu-latest
++    steps:
++      - uses: actions/checkout@v4
++      - uses: actions/setup-python@v5
++        with:
++          python-version: '3.12'
++          cache: pip
++      - name: Instalar dependencias
++        run: |
++          pip install -r requirements.txt
++          pip install pytest pytest-cov bandit flake8 pip-audit
++      - name: Compilar traducciones
++        run: pybabel compile -d app/translations
++      - name: Analisis de estilo (flake8)
++        run: flake8 app --max-line-length=100 --count
++        continue-on-error: true
++      - name: Analisis de seguridad (bandit, falla con severidad alta)
++        run: bandit -r app -lll
++      - name: Pruebas unitarias, integracion, sistema, aceptacion y seguridad
++        run: pytest tests.py qa -v --junitxml=junit.xml --cov=app --cov-report=xml --cov-fail-under=70
++      - name: Auditoria de dependencias
++        run: pip-audit -r requirements.txt --no-deps --disable-pip
++        continue-on-error: true
++      - name: Publicar reportes
++        if: always()
++        uses: actions/upload-artifact@v4
++        with:
++          name: reportes
++          path: |
++            junit.xml
++            coverage.xml
+-- 
+2.43.0
+

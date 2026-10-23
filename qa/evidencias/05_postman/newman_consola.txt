@@ -1,0 +1,75 @@
+newman
+
+Microblog QA - API
+
+→ PM-01 Crear usuario (201)
+  POST http://127.0.0.1:8200/api/users [201 CREATED, 908B, 153ms]
+  ✓  201 Created
+  ✓  devuelve username
+
+→ PM-02 Email invalido (400)
+  POST http://127.0.0.1:8200/api/users [400 BAD REQUEST, 604B, 6ms]
+  ✓  400 Bad Request
+
+→ PM-03 Password corta (400)
+  POST http://127.0.0.1:8200/api/users [400 BAD REQUEST, 615B, 6ms]
+  ✓  400 Bad Request
+
+→ PM-04 Obtener token (200)
+  POST http://127.0.0.1:8200/api/tokens [200 OK, 574B, 108ms]
+  ✓  200 OK
+  ✓  token de 32 caracteres
+
+→ PM-05 Listar usuarios con token (200)
+  GET http://127.0.0.1:8200/api/users [200 OK, 1.03kB, 20ms]
+  ✓  200 OK
+  ✓  responde en menos de 800 ms
+  ✓  incluye _meta
+
+→ PM-06 Listar usuarios sin token (401)
+  GET http://127.0.0.1:8200/api/users [401 UNAUTHORIZED, 622B, 5ms]
+  ✓  401 Unauthorized
+
+→ PM-07 Actualizar perfil propio (200)
+  PUT http://127.0.0.1:8200/api/users/1 [200 OK, 895B, 12ms]
+  ✓  200 OK
+  ✓  about_me actualizado
+
+→ PM-08 about_me > 140 (400)
+  PUT http://127.0.0.1:8200/api/users/1 [400 BAD REQUEST, 626B, 7ms]
+  ✓  400 Bad Request
+
+→ PM-09 Health check (200)
+  GET http://127.0.0.1:8200/api/health [200 OK, 561B, 8ms]
+  ✓  200 OK
+  ✓  status ok
+
+→ PM-10 Cabeceras de seguridad
+  GET http://127.0.0.1:8200/api/health [200 OK, 561B, 7ms]
+  ✓  X-Content-Type-Options
+  ✓  X-Frame-Options
+  ✓  Content-Security-Policy
+
+→ PM-11 Fuerza bruta: bloqueo 429
+  POST http://127.0.0.1:8200/api/tokens [401 UNAUTHORIZED, 621B, 104ms]
+  ✓  401 o 429
+
+┌─────────────────────────┬───────────────────┬──────────────────┐
+│                         │          executed │           failed │
+├─────────────────────────┼───────────────────┼──────────────────┤
+│              iterations │                 1 │                0 │
+├─────────────────────────┼───────────────────┼──────────────────┤
+│                requests │                11 │                0 │
+├─────────────────────────┼───────────────────┼──────────────────┤
+│            test-scripts │                11 │                0 │
+├─────────────────────────┼───────────────────┼──────────────────┤
+│      prerequest-scripts │                 0 │                0 │
+├─────────────────────────┼───────────────────┼──────────────────┤
+│              assertions │                19 │                0 │
+├─────────────────────────┴───────────────────┴──────────────────┤
+│ total run duration: 669ms                                      │
+├────────────────────────────────────────────────────────────────┤
+│ total data received: 1.6kB (approx)                            │
+├────────────────────────────────────────────────────────────────┤
+│ average response time: 39ms [min: 5ms, max: 153ms, s.d.: 51ms] │
+└────────────────────────────────────────────────────────────────┘

@@ -1,0 +1,10 @@
+3a3d08a docs: evidencias de ejecucion antes/despues, analisis estatico, rendimiento y Postman
+4cb80ae test: coleccion Postman, escenarios Locust, script Selenium y artefactos Scrum
+993a53d ci: pipeline GitHub Actions con pruebas, cobertura, bandit y pip-audit
+0376b43 test: suite QA de unidad, integracion, sistema, aceptacion y seguridad
+ff3b794 feat(evolutivo): endpoint GET /api/health para monitoreo (EV-01)
+e6444c6 refactor(preventivo): os.system -> subprocess y MD5 de Gravatar marcado no criptografico (BUG-10)
+b51a0ac fix(security): cabeceras HTTP de seguridad X-Content-Type-Options, X-Frame-Options, CSP (BUG-09)
+4e68c34 fix(security): SECRET_KEY aleatoria si no se define; elimina clave publica por defecto (BUG-05,06)
+2f30f23 fix(api): bloqueo temporal tras 5 intentos fallidos en /api/tokens, responde 429 (BUG-08)
+3a7102f fix(api): validar cuerpo JSON, email, username, about_me y password en POST/PUT /api/users (BUG-01,02,03,04,07)

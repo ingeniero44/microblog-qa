@@ -1,0 +1,136 @@
+Run started:2026-10-22 00:49:56.780590+00:00
+
+Test results:
+>> Issue: [B605:start_process_with_a_shell] Starting a process with a shell: Seems safe, but may be changed in the future, consider rewriting without shell
+   Severity: Low   Confidence: High
+   CWE: CWE-78 (https://cwe.mitre.org/data/definitions/78.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b605_start_process_with_a_shell.html
+   Location: app/cli.py:18:7
+17	    """Initialize a new language."""
+18	    if os.system('pybabel extract -F babel.cfg -k _l -o messages.pot .'):
+19	        raise RuntimeError('extract command failed')
+
+--------------------------------------------------
+>> Issue: [B607:start_process_with_partial_path] Starting a process with a partial executable path
+   Severity: Low   Confidence: High
+   CWE: CWE-78 (https://cwe.mitre.org/data/definitions/78.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b607_start_process_with_partial_path.html
+   Location: app/cli.py:18:7
+17	    """Initialize a new language."""
+18	    if os.system('pybabel extract -F babel.cfg -k _l -o messages.pot .'):
+19	        raise RuntimeError('extract command failed')
+
+--------------------------------------------------
+>> Issue: [B605:start_process_with_a_shell] Starting a process with a shell, possible injection detected, security issue.
+   Severity: High   Confidence: High
+   CWE: CWE-78 (https://cwe.mitre.org/data/definitions/78.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b605_start_process_with_a_shell.html
+   Location: app/cli.py:20:7
+19	        raise RuntimeError('extract command failed')
+20	    if os.system(
+21	            'pybabel init -i messages.pot -d app/translations -l ' + lang):
+22	        raise RuntimeError('init command failed')
+
+--------------------------------------------------
+>> Issue: [B605:start_process_with_a_shell] Starting a process with a shell: Seems safe, but may be changed in the future, consider rewriting without shell
+   Severity: Low   Confidence: High
+   CWE: CWE-78 (https://cwe.mitre.org/data/definitions/78.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b605_start_process_with_a_shell.html
+   Location: app/cli.py:29:7
+28	    """Update all languages."""
+29	    if os.system('pybabel extract -F babel.cfg -k _l -o messages.pot .'):
+30	        raise RuntimeError('extract command failed')
+
+--------------------------------------------------
+>> Issue: [B607:start_process_with_partial_path] Starting a process with a partial executable path
+   Severity: Low   Confidence: High
+   CWE: CWE-78 (https://cwe.mitre.org/data/definitions/78.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b607_start_process_with_partial_path.html
+   Location: app/cli.py:29:7
+28	    """Update all languages."""
+29	    if os.system('pybabel extract -F babel.cfg -k _l -o messages.pot .'):
+30	        raise RuntimeError('extract command failed')
+
+--------------------------------------------------
+>> Issue: [B605:start_process_with_a_shell] Starting a process with a shell: Seems safe, but may be changed in the future, consider rewriting without shell
+   Severity: Low   Confidence: High
+   CWE: CWE-78 (https://cwe.mitre.org/data/definitions/78.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b605_start_process_with_a_shell.html
+   Location: app/cli.py:31:7
+30	        raise RuntimeError('extract command failed')
+31	    if os.system('pybabel update -i messages.pot -d app/translations'):
+32	        raise RuntimeError('update command failed')
+
+--------------------------------------------------
+>> Issue: [B607:start_process_with_partial_path] Starting a process with a partial executable path
+   Severity: Low   Confidence: High
+   CWE: CWE-78 (https://cwe.mitre.org/data/definitions/78.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b607_start_process_with_partial_path.html
+   Location: app/cli.py:31:7
+30	        raise RuntimeError('extract command failed')
+31	    if os.system('pybabel update -i messages.pot -d app/translations'):
+32	        raise RuntimeError('update command failed')
+
+--------------------------------------------------
+>> Issue: [B605:start_process_with_a_shell] Starting a process with a shell: Seems safe, but may be changed in the future, consider rewriting without shell
+   Severity: Low   Confidence: High
+   CWE: CWE-78 (https://cwe.mitre.org/data/definitions/78.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b605_start_process_with_a_shell.html
+   Location: app/cli.py:39:7
+38	    """Compile all languages."""
+39	    if os.system('pybabel compile -d app/translations'):
+40	        raise RuntimeError('compile command failed')
+
+--------------------------------------------------
+>> Issue: [B607:start_process_with_partial_path] Starting a process with a partial executable path
+   Severity: Low   Confidence: High
+   CWE: CWE-78 (https://cwe.mitre.org/data/definitions/78.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b607_start_process_with_partial_path.html
+   Location: app/cli.py:39:7
+38	    """Compile all languages."""
+39	    if os.system('pybabel compile -d app/translations'):
+40	        raise RuntimeError('compile command failed')
+
+--------------------------------------------------
+>> Issue: [B324:hashlib] Use of weak MD5 hash for security. Consider usedforsecurity=False
+   Severity: High   Confidence: High
+   CWE: CWE-327 (https://cwe.mitre.org/data/definitions/327.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b324_hashlib.html
+   Location: app/models.py:141:17
+140	    def avatar(self, size):
+141	        digest = md5(self.email.lower().encode('utf-8')).hexdigest()
+142	        return f'https://www.gravatar.com/avatar/{digest}?d=identicon&s={size}'
+
+--------------------------------------------------
+>> Issue: [B113:request_without_timeout] Call to requests without timeout
+   Severity: Medium   Confidence: Low
+   CWE: CWE-400 (https://cwe.mitre.org/data/definitions/400.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b113_request_without_timeout.html
+   Location: app/translate.py:14:8
+13	    }
+14	    r = requests.post(
+15	        'https://api.cognitive.microsofttranslator.com'
+16	        '/translate?api-version=3.0&from={}&to={}'.format(
+17	            source_language, dest_language), headers=auth, json=[
+18	                {'Text': text}])
+19	    if r.status_code != 200:
+
+--------------------------------------------------
+
+Code scanned:
+	Total lines of code: 1050
+	Total lines skipped (#nosec): 0
+	Total potential issues skipped due to specifically being disabled (e.g., #nosec BXXX): 0
+
+Run metrics:
+	Total issues (by severity):
+		Undefined: 0
+		Low: 8
+		Medium: 1
+		High: 2
+	Total issues (by confidence):
+		Undefined: 0
+		Low: 1
+		Medium: 0
+		High: 10
+Files skipped (0):

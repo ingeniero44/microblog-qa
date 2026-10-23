@@ -1,0 +1,78 @@
+From e6444c61c76b9d03971d9d76f0b08b066c22956c Mon Sep 17 00:00:00 2001
+From: Equipo QA <qa@example.com>
+Date: Thu, 22 Oct 2026 00:51:07 +0000
+Subject: [PATCH 05/10] refactor(preventivo): os.system -> subprocess y MD5 de
+ Gravatar marcado no criptografico (BUG-10)
+
+---
+ app/cli.py    | 19 +++++++++++++------
+ app/models.py |  4 +++-
+ 2 files changed, 16 insertions(+), 7 deletions(-)
+
+diff --git a/app/cli.py b/app/cli.py
+index 25e2a27..2ca83e3 100644
+--- a/app/cli.py
++++ b/app/cli.py
+@@ -1,4 +1,6 @@
+ import os
++import re
++import subprocess
+ from flask import Blueprint
+ import click
+ 
+@@ -15,10 +17,13 @@ def translate():
+ @click.argument('lang')
+ def init(lang):
+     """Initialize a new language."""
+-    if os.system('pybabel extract -F babel.cfg -k _l -o messages.pot .'):
++    if not re.fullmatch(r'[A-Za-z_]{2,10}', lang):
++        raise click.BadParameter('invalid language code')
++    if subprocess.run(['pybabel', 'extract', '-F', 'babel.cfg', '-k', '_l',
++                       '-o', 'messages.pot', '.']).returncode:
+         raise RuntimeError('extract command failed')
+-    if os.system(
+-            'pybabel init -i messages.pot -d app/translations -l ' + lang):
++    if subprocess.run(['pybabel', 'init', '-i', 'messages.pot',
++                       '-d', 'app/translations', '-l', lang]).returncode:
+         raise RuntimeError('init command failed')
+     os.remove('messages.pot')
+ 
+@@ -26,9 +31,11 @@ def init(lang):
+ @translate.command()
+ def update():
+     """Update all languages."""
+-    if os.system('pybabel extract -F babel.cfg -k _l -o messages.pot .'):
++    if subprocess.run(['pybabel', 'extract', '-F', 'babel.cfg', '-k', '_l',
++                       '-o', 'messages.pot', '.']).returncode:
+         raise RuntimeError('extract command failed')
+-    if os.system('pybabel update -i messages.pot -d app/translations'):
++    if subprocess.run(['pybabel', 'update', '-i', 'messages.pot',
++                       '-d', 'app/translations']).returncode:
+         raise RuntimeError('update command failed')
+     os.remove('messages.pot')
+ 
+@@ -36,5 +43,5 @@ def update():
+ @translate.command()
+ def compile():
+     """Compile all languages."""
+-    if os.system('pybabel compile -d app/translations'):
++    if subprocess.run(['pybabel', 'compile', '-d', 'app/translations']).returncode:
+         raise RuntimeError('compile command failed')
+diff --git a/app/models.py b/app/models.py
+index db447d8..ae44c66 100644
+--- a/app/models.py
++++ b/app/models.py
+@@ -138,7 +138,9 @@ class User(PaginatedAPIMixin, UserMixin, db.Model):
+         return check_password_hash(self.password_hash, password)
+ 
+     def avatar(self, size):
+-        digest = md5(self.email.lower().encode('utf-8')).hexdigest()
++        # MD5 solo se usa como identificador de Gravatar, no con fines criptograficos
++        digest = md5(self.email.lower().encode('utf-8'),
++                     usedforsecurity=False).hexdigest()
+         return f'https://www.gravatar.com/avatar/{digest}?d=identicon&s={size}'
+ 
+     def follow(self, user):
+-- 
+2.43.0
+

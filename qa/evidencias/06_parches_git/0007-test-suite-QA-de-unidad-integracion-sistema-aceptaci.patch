@@ -1,0 +1,603 @@
+From 0376b43bcc7b6433a236f38fcbf825101c6ee7e3 Mon Sep 17 00:00:00 2001
+From: Equipo QA <qa@example.com>
+Date: Thu, 22 Oct 2026 00:51:07 +0000
+Subject: [PATCH 07/10] test: suite QA de unidad, integracion, sistema,
+ aceptacion y seguridad
+
+---
+ qa/conftest.py               |  57 +++++++++++++
+ qa/test_integration_api.py   | 128 +++++++++++++++++++++++++++++
+ qa/test_security.py          | 107 +++++++++++++++++++++++++
+ qa/test_system_acceptance.py | 151 +++++++++++++++++++++++++++++++++++
+ qa/test_unit.py              | 108 +++++++++++++++++++++++++
+ 5 files changed, 551 insertions(+)
+ create mode 100644 qa/conftest.py
+ create mode 100644 qa/test_integration_api.py
+ create mode 100644 qa/test_security.py
+ create mode 100644 qa/test_system_acceptance.py
+ create mode 100644 qa/test_unit.py
+
+diff --git a/qa/conftest.py b/qa/conftest.py
+new file mode 100644
+index 0000000..4673041
+--- /dev/null
++++ b/qa/conftest.py
+@@ -0,0 +1,57 @@
++import sys, os
++sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
++import pytest
++from app import create_app, db
++from app.models import User, Post
++from config import Config
++
++
++class QAConfig(Config):
++    TESTING = True
++    SQLALCHEMY_DATABASE_URI = 'sqlite://'
++    ELASTICSEARCH_URL = None
++    WTF_CSRF_ENABLED = False
++
++
++@pytest.fixture
++def app():
++    app = create_app(QAConfig)
++    with app.app_context():
++        db.create_all()
++        yield app
++        db.session.remove()
++        db.drop_all()
++
++
++@pytest.fixture
++def client(app):
++    return app.test_client()
++
++
++@pytest.fixture
++def make_user(app):
++    def _make(username='ana', email='ana@example.com', password='Clave123*'):
++        u = User(username=username, email=email)
++        u.set_password(password)
++        db.session.add(u)
++        db.session.commit()
++        return u
++    return _make
++
++
++@pytest.fixture
++def login(client):
++    def _login(username='ana', password='Clave123*'):
++        return client.post('/auth/login', data={'username': username, 'password': password},
++                           follow_redirects=False)
++    return _login
++
++
++@pytest.fixture
++def api_token(client, make_user):
++    def _tok(username='ana', password='Clave123*'):
++        import base64
++        cred = base64.b64encode(f'{username}:{password}'.encode()).decode()
++        r = client.post('/api/tokens', headers={'Authorization': f'Basic {cred}'})
++        return r.get_json()['token']
++    return _tok
+diff --git a/qa/test_integration_api.py b/qa/test_integration_api.py
+new file mode 100644
+index 0000000..0015727
+--- /dev/null
++++ b/qa/test_integration_api.py
+@@ -0,0 +1,128 @@
++"""Pruebas de INTEGRACION (API REST + BD). IDs IT-xx"""
++import base64, json
++
++
++def basic(u, p):
++    return {'Authorization': 'Basic ' + base64.b64encode(f'{u}:{p}'.encode()).decode()}
++
++
++def bearer(t):
++    return {'Authorization': f'Bearer {t}'}
++
++
++def test_IT01_crear_usuario_201(client):
++    r = client.post('/api/users', json={'username': 'luis', 'email': 'luis@e.com', 'password': 'Clave123*'})
++    assert r.status_code == 201
++    assert r.get_json()['username'] == 'luis'
++    assert '/api/users/' in r.headers['Location']
++
++
++def test_IT02_crear_usuario_campos_faltantes_400(client):
++    r = client.post('/api/users', json={'username': 'luis'})
++    assert r.status_code == 400
++
++
++def test_IT03_crear_usuario_duplicado_400(client, make_user):
++    make_user()
++    r = client.post('/api/users', json={'username': 'ana', 'email': 'otro@e.com', 'password': 'x'})
++    assert r.status_code == 400
++
++
++def test_IT04_token_con_credenciales_validas(client, make_user):
++    make_user()
++    r = client.post('/api/tokens', headers=basic('ana', 'Clave123*'))
++    assert r.status_code == 200 and len(r.get_json()['token']) == 32
++
++
++def test_IT05_token_con_credenciales_invalidas_401(client, make_user):
++    make_user()
++    assert client.post('/api/tokens', headers=basic('ana', 'mala')).status_code == 401
++
++
++def test_IT06_listar_usuarios_sin_token_401(client):
++    assert client.get('/api/users').status_code == 401
++
++
++def test_IT07_listar_usuarios_con_token_200(client, make_user, api_token):
++    make_user(); t = api_token()
++    r = client.get('/api/users', headers=bearer(t))
++    assert r.status_code == 200 and r.get_json()['_meta']['total_items'] == 1
++
++
++def test_IT08_per_page_limitado_a_100(client, make_user, api_token):
++    make_user(); t = api_token()
++    r = client.get('/api/users?per_page=5000', headers=bearer(t))
++    assert r.get_json()['_meta']['per_page'] == 100
++
++
++def test_IT09_obtener_usuario_inexistente_404(client, make_user, api_token):
++    make_user(); t = api_token()
++    assert client.get('/api/users/999', headers=bearer(t)).status_code == 404
++
++
++def test_IT10_actualizar_otro_usuario_403(client, make_user, api_token):
++    make_user(); make_user('beto', 'b@e.com'); t = api_token()
++    r = client.put('/api/users/2', json={'about_me': 'hack'}, headers=bearer(t))
++    assert r.status_code == 403
++
++
++def test_IT11_actualizar_propio_perfil_200(client, make_user, api_token):
++    make_user(); t = api_token()
++    r = client.put('/api/users/1', json={'about_me': 'hola'}, headers=bearer(t))
++    assert r.status_code == 200 and r.get_json()['about_me'] == 'hola'
++
++
++def test_IT12_revocar_token_y_reusar_401(client, make_user, api_token):
++    make_user(); t = api_token()
++    assert client.delete('/api/tokens', headers=bearer(t)).status_code == 204
++    assert client.get('/api/users', headers=bearer(t)).status_code == 401
++
++
++def test_IT13_seguidores_paginados(client, make_user, api_token):
++    a = make_user(); b = make_user('beto', 'b@e.com')
++    from app import db
++    b.follow(a); db.session.commit()
++    t = api_token()
++    r = client.get('/api/users/1/followers', headers=bearer(t))
++    assert r.get_json()['_meta']['total_items'] == 1
++
++
++# ---- Pruebas negativas que revelan defectos (ver reporte) ----
++def test_IT14_crear_usuario_email_invalido_deberia_400(client):
++    r = client.post('/api/users', json={'username': 'x', 'email': 'esto-no-es-correo', 'password': 'abc'})
++    assert r.status_code == 400, f'API acepto un email invalido (status {r.status_code})'
++
++
++def test_IT15_crear_usuario_username_vacio_deberia_400(client):
++    r = client.post('/api/users', json={'username': '', 'email': 'v@e.com', 'password': 'abc'})
++    assert r.status_code == 400, f'API acepto username vacio (status {r.status_code})'
++
++
++def test_IT16_crear_usuario_cuerpo_json_null_no_debe_dar_500(client):
++    r = client.post('/api/users', data='null', content_type='application/json')
++    assert r.status_code < 500, f'Error de servidor {r.status_code} con cuerpo null'
++
++
++def test_IT17_crear_usuario_cuerpo_lista_no_debe_dar_500(client):
++    r = client.post('/api/users', data='[]', content_type='application/json')
++    assert r.status_code < 500, f'Error de servidor {r.status_code} con cuerpo lista'
++
++
++def test_IT18_actualizar_con_about_me_mayor_140_deberia_400(client, make_user, api_token):
++    make_user(); t = api_token()
++    r = client.put('/api/users/1', json={'about_me': 'x' * 500}, headers=bearer(t))
++    assert r.status_code == 400, f'API acepto about_me de 500 caracteres (status {r.status_code})'
++
++
++def test_IT19_actualizar_username_vacio_deberia_400(client, make_user, api_token):
++    make_user(); t = api_token()
++    r = client.put('/api/users/1', json={'username': ''}, headers=bearer(t))
++    assert r.status_code == 400, f'API acepto username vacio en PUT (status {r.status_code})'
++
++
++def test_IT20_health_check_publico_y_con_bd(client):
++    """Mejora evolutiva EV-01: endpoint de salud para monitoreo."""
++    r = client.get('/api/health')
++    assert r.status_code == 200
++    body = r.get_json()
++    assert body['status'] == 'ok' and body['database'] == 'ok'
+diff --git a/qa/test_security.py b/qa/test_security.py
+new file mode 100644
+index 0000000..9b48b99
+--- /dev/null
++++ b/qa/test_security.py
+@@ -0,0 +1,107 @@
++"""Pruebas de SEGURIDAD (OWASP Top 10). IDs SEC-xx"""
++import base64
++import jwt, time
++import sqlalchemy as sa
++from app import db
++from app.models import User
++
++
++def test_SEC01_inyeccion_sql_en_login_no_autentica(client, make_user):
++    make_user()
++    r = client.post('/auth/login', data={'username': "' OR '1'='1' --", 'password': 'x'}, follow_redirects=False)
++    assert client.get('/index').status_code == 302  # sigue sin sesion
++
++
++def test_SEC02_inyeccion_sql_en_url_de_usuario(client, make_user, login):
++    make_user(); login()
++    r = client.get("/user/ana' OR '1'='1")
++    assert r.status_code == 404
++
++
++def test_SEC03_xss_en_about_me_escapado(client, make_user, login):
++    make_user(); login()
++    client.post('/edit_profile', data={'username': 'ana', 'about_me': '<img src=x onerror=alert(1)>'})
++    r = client.get('/user/ana')
++    assert b'<img src=x onerror=alert(1)>' not in r.data
++
++
++def test_SEC04_contrasenas_con_hash_salado(make_user):
++    a = make_user('a', 'a@e.com', 'misma'); b = make_user('b', 'b@e.com', 'misma')
++    assert a.password_hash != b.password_hash
++    assert a.password_hash.startswith(('scrypt:', 'pbkdf2:'))
++
++
++def test_SEC05_rutas_privadas_requieren_sesion(client):
++    for ruta in ['/index', '/explore', '/user/ana', '/edit_profile', '/messages', '/export_posts']:
++        assert client.get(ruta).status_code in (302, 401, 404, 405), ruta
++        assert client.get(ruta).status_code != 200, ruta
++
++
++def test_SEC06_csrf_activo_por_defecto():
++    from app import create_app
++    from config import Config
++    class C(Config):
++        TESTING = True
++        SQLALCHEMY_DATABASE_URI = 'sqlite://'
++        ELASTICSEARCH_URL = None
++    app = create_app(C)
++    with app.app_context():
++        db.create_all()
++        u = User(username='ana', email='a@e.com'); u.set_password('x'); db.session.add(u); db.session.commit()
++        c = app.test_client()
++        r = c.post('/auth/login', data={'username': 'ana', 'password': 'x'})
++        assert r.status_code == 200 and b'CSRF' in r.data  # rechazado por falta de token
++
++
++def test_SEC07_open_redirect_con_next_netloc_bloqueado(client, make_user):
++    make_user()
++    r = client.post('/auth/login?next=//evil.com', data={'username': 'ana', 'password': 'Clave123*'})
++    assert 'evil.com' not in r.headers['Location']
++
++
++def test_SEC08_open_redirect_con_barra_invertida(client, make_user):
++    make_user()
++    r = client.post('/auth/login?next=/\\evil.com', data={'username': 'ana', 'password': 'Clave123*'})
++    from urllib.parse import urlsplit
++    loc = r.headers['Location']
++    assert urlsplit(loc).netloc == '' and not loc.startswith('//'), f'Redireccion a destino externo: {loc}'
++
++
++def test_SEC09_secret_key_por_defecto_no_deberia_usarse():
++    from config import Config
++    assert Config.SECRET_KEY != 'you-will-never-guess', 'SECRET_KEY por defecto publica en el repositorio'
++
++
++def test_SEC10_token_de_reset_falsificable_con_clave_por_defecto(client, make_user):
++    u = make_user()
++    from config import Config
++    forged = jwt.encode({'reset_password': u.id, 'exp': time.time() + 600}, 'you-will-never-guess', algorithm='HS256')
++    r = client.post(f'/auth/reset_password/{forged}', data={'password': 'hack', 'password2': 'hack'})
++    db.session.expire_all()
++    assert not db.session.get(User, u.id).check_password('hack'), 'Se pudo restablecer la contrasena con un token falsificado'
++
++
++def test_SEC11_fuerza_bruta_api_sin_bloqueo(client, make_user):
++    make_user()
++    cred = lambda p: {'Authorization': 'Basic ' + base64.b64encode(f'ana:{p}'.encode()).decode()}
++    codes = [client.post('/api/tokens', headers=cred(f'intento{i}')).status_code for i in range(50)]
++    assert 429 in codes, 'Sin limite de intentos: 50 intentos fallidos seguidos sin bloqueo (no hay 429)'
++
++
++def test_SEC12_politica_de_contrasena_minima(client):
++    r = client.post('/api/users', json={'username': 'u', 'email': 'u@e.com', 'password': '1'})
++    assert r.status_code == 400, 'La API acepta contrasenas de 1 caracter'
++
++
++def test_SEC13_cabeceras_de_seguridad_http(client, make_user, login):
++    make_user(); login()
++    h = client.get('/index').headers
++    faltan = [x for x in ['X-Content-Type-Options', 'X-Frame-Options', 'Content-Security-Policy'] if x not in h]
++    assert not faltan, f'Cabeceras ausentes: {faltan}'
++
++
++def test_SEC14_enumeracion_de_usuarios_en_reset(client, make_user):
++    make_user()
++    r1 = client.post('/auth/reset_password_request', data={'email': 'ana@example.com'}, follow_redirects=True)
++    r2 = client.post('/auth/reset_password_request', data={'email': 'noexiste@example.com'}, follow_redirects=True)
++    assert (b'Check your email' in r1.data) == (b'Check your email' in r2.data)
+diff --git a/qa/test_system_acceptance.py b/qa/test_system_acceptance.py
+new file mode 100644
+index 0000000..22ee1a2
+--- /dev/null
++++ b/qa/test_system_acceptance.py
+@@ -0,0 +1,151 @@
++"""Pruebas de SISTEMA (flujos web completos) y ACEPTACION (Dado/Cuando/Entonces). IDs ST-xx / AT-xx"""
++from app import db
++from app.models import User, Post
++import sqlalchemy as sa
++
++
++def registrar(client, u='ana', e='ana@example.com', p='Clave123*', p2=None):
++    return client.post('/auth/register', data={'username': u, 'email': e, 'password': p,
++                                                'password2': p2 or p}, follow_redirects=True)
++
++
++def test_ST01_flujo_registro_login_publicar(client):
++    r = registrar(client)
++    assert b'you are now a registered user' in r.data
++    r = client.post('/auth/login', data={'username': 'ana', 'password': 'Clave123*'}, follow_redirects=True)
++    assert b'Hi, ana' in r.data or b'ana' in r.data
++    r = client.post('/', data={'post': 'Mi primer post'}, follow_redirects=True)
++    assert b'Your post is now live' in r.data and b'Mi primer post' in r.data
++
++
++def test_ST02_pagina_privada_redirige_a_login(client):
++    r = client.get('/index')
++    assert r.status_code == 302 and '/auth/login' in r.headers['Location']
++
++
++def test_ST03_login_invalido_muestra_error(client, make_user):
++    make_user()
++    r = client.post('/auth/login', data={'username': 'ana', 'password': 'mala'}, follow_redirects=True)
++    assert b'Invalid username or password' in r.data
++
++
++def test_ST04_registro_passwords_distintas_rechazado(client):
++    r = registrar(client, p2='otra')
++    assert db.session.scalar(sa.select(User).where(User.username == 'ana')) is None
++
++
++def test_ST05_registro_email_invalido_rechazado(client):
++    registrar(client, e='no-es-email')
++    assert db.session.scalar(sa.select(User).where(User.username == 'ana')) is None
++
++
++def test_ST06_post_vacio_rechazado(client, make_user, login):
++    make_user(); login()
++    client.post('/', data={'post': ''}, follow_redirects=True)
++    assert db.session.scalar(sa.select(sa.func.count()).select_from(Post)) == 0
++
++
++def test_ST07_post_mayor_140_rechazado(client, make_user, login):
++    make_user(); login()
++    client.post('/', data={'post': 'x' * 141}, follow_redirects=True)
++    assert db.session.scalar(sa.select(sa.func.count()).select_from(Post)) == 0
++
++
++def test_ST08_seguir_y_dejar_de_seguir(client, make_user, login):
++    make_user(); make_user('beto', 'b@e.com'); login()
++    client.post('/follow/beto', follow_redirects=True)
++    a = db.session.scalar(sa.select(User).where(User.username == 'ana'))
++    b = db.session.scalar(sa.select(User).where(User.username == 'beto'))
++    assert a.is_following(b)
++    client.post('/unfollow/beto', follow_redirects=True)
++    assert not a.is_following(b)
++
++
++def test_ST09_no_puede_seguirse_a_si_mismo(client, make_user, login):
++    make_user(); login()
++    r = client.post('/follow/ana', follow_redirects=True)
++    assert b'cannot follow yourself' in r.data
++
++
++def test_ST10_editar_perfil(client, make_user, login):
++    make_user(); login()
++    client.post('/edit_profile', data={'username': 'ana', 'about_me': 'Estudiante'}, follow_redirects=True)
++    assert db.session.scalar(sa.select(User).where(User.username == 'ana')).about_me == 'Estudiante'
++
++
++def test_ST11_nombre_usuario_duplicado_en_edicion(client, make_user, login):
++    make_user(); make_user('beto', 'b@e.com'); login()
++    r = client.post('/edit_profile', data={'username': 'beto', 'about_me': ''}, follow_redirects=True)
++    assert b'Please use a different username' in r.data
++
++
++def test_ST12_explorar_muestra_posts_de_todos(client, make_user, login):
++    u2 = make_user('beto', 'b@e.com'); make_user(); 
++    db.session.add(Post(body='post de beto', author=u2)); db.session.commit()
++    login()
++    assert b'post de beto' in client.get('/explore').data
++
++
++def test_ST13_logout_cierra_sesion(client, make_user, login):
++    make_user(); login()
++    client.get('/auth/logout')
++    assert client.get('/index').status_code == 302
++
++
++def test_ST14_usuario_inexistente_404(client, make_user, login):
++    make_user(); login()
++    assert client.get('/user/fantasma').status_code == 404
++
++
++def test_ST15_xss_en_post_es_escapado(client, make_user, login):
++    make_user(); login()
++    client.post('/', data={'post': '<script>alert(1)</script>'}, follow_redirects=True)
++    r = client.get('/explore')
++    assert b'<script>alert(1)</script>' not in r.data
++
++
++# ---------- ACEPTACION (criterios Dado/Cuando/Entonces) ----------
++def test_AT01_un_usuario_nuevo_puede_registrarse_e_ingresar(client):
++    # Dado un visitante sin cuenta; Cuando se registra y entra; Entonces ve su pagina de inicio
++    registrar(client)
++    r = client.post('/auth/login', data={'username': 'ana', 'password': 'Clave123*'}, follow_redirects=True)
++    assert r.status_code == 200 and b'Home' in r.data
++
++
++def test_AT02_el_inicio_muestra_solo_posts_propios_y_de_seguidos(client, make_user, login):
++    ana = make_user(); beto = make_user('beto', 'b@e.com'); carla = make_user('carla', 'c@e.com')
++    db.session.add_all([Post(body='de-beto', author=beto), Post(body='de-carla', author=carla)])
++    ana.follow(beto); db.session.commit(); login()
++    r = client.get('/index')
++    assert b'de-beto' in r.data and b'de-carla' not in r.data
++
++
++def test_AT03_la_paginacion_limita_a_25_posts(client, make_user, login):
++    ana = make_user()
++    for i in range(30):
++        db.session.add(Post(body=f'p{i}', author=ana))
++    db.session.commit(); login()
++    r = client.get('/index')
++    assert r.data.count(b'class="post') <= 25 or r.data.count(b'<table') <= 26
++    assert b'Older posts' in r.data
++
++
++def test_AT04_el_idioma_es_se_aplica_con_accept_language(tmp_path):
++    # Se usa una app aislada sin contexto global para que el idioma no quede en cache
++    from app import create_app
++    from config import Config
++
++    class C(Config):
++        TESTING = True
++        SQLALCHEMY_DATABASE_URI = f"sqlite:///{tmp_path}/t.db"
++        ELASTICSEARCH_URL = None
++        WTF_CSRF_ENABLED = False
++    app = create_app(C)
++    with app.app_context():
++        db.create_all()
++        u = User(username='ana', email='a@e.com'); u.set_password('x')
++        db.session.add(u); db.session.commit()
++    c = app.test_client()
++    c.post('/auth/login', data={'username': 'ana', 'password': 'x'}, headers={'Accept-Language': 'es'})
++    r = c.get('/index', headers={'Accept-Language': 'es'})
++    assert 'Inicio' in r.data.decode()
+diff --git a/qa/test_unit.py b/qa/test_unit.py
+new file mode 100644
+index 0000000..6a00c8b
+--- /dev/null
++++ b/qa/test_unit.py
+@@ -0,0 +1,108 @@
++"""Pruebas de UNIDAD (modelos). IDs UT-xx"""
++import pytest
++from datetime import datetime, timezone, timedelta
++from app import db
++from app.models import User, Post
++
++
++def test_UT01_password_hash_no_es_texto_plano(make_user):
++    u = make_user(password='secreta')
++    assert u.password_hash != 'secreta'
++    assert u.check_password('secreta')
++
++
++def test_UT02_password_incorrecta_rechazada(make_user):
++    u = make_user(password='secreta')
++    assert not u.check_password('otra')
++
++
++def test_UT03_avatar_usa_email_en_minusculas(app):
++    a = User(username='a', email='JUAN@Example.com')
++    b = User(username='b', email='juan@example.com')
++    assert a.avatar(64) == b.avatar(64)
++
++
++def test_UT04_avatar_incluye_tamano(app):
++    u = User(username='a', email='a@e.com')
++    assert u.avatar(200).endswith('s=200')
++
++
++def test_UT05_follow_y_unfollow(make_user):
++    u1 = make_user('u1', 'u1@e.com'); u2 = make_user('u2', 'u2@e.com')
++    u1.follow(u2); db.session.commit()
++    assert u1.is_following(u2) and u2.followers_count() == 1
++    u1.unfollow(u2); db.session.commit()
++    assert not u1.is_following(u2) and u2.followers_count() == 0
++
++
++def test_UT06_follow_duplicado_no_duplica(make_user):
++    u1 = make_user('u1', 'u1@e.com'); u2 = make_user('u2', 'u2@e.com')
++    u1.follow(u2); u1.follow(u2); db.session.commit()
++    assert u1.following_count() == 1
++
++
++def test_UT07_following_posts_orden_y_contenido(make_user):
++    u1 = make_user('u1', 'u1@e.com'); u2 = make_user('u2', 'u2@e.com'); u3 = make_user('u3', 'u3@e.com')
++    now = datetime.now(timezone.utc)
++    p1 = Post(body='p1', author=u1, timestamp=now + timedelta(seconds=1))
++    p2 = Post(body='p2', author=u2, timestamp=now + timedelta(seconds=4))
++    p3 = Post(body='p3', author=u3, timestamp=now + timedelta(seconds=3))
++    db.session.add_all([p1, p2, p3]); db.session.commit()
++    u1.follow(u2); db.session.commit()
++    assert [p.body for p in db.session.scalars(u1.following_posts())] == ['p2', 'p1']
++
++
++def test_UT08_token_reset_valido(make_user):
++    u = make_user()
++    t = u.get_reset_password_token()
++    assert User.verify_reset_password_token(t) == u
++
++
++def test_UT09_token_reset_expirado(make_user):
++    u = make_user()
++    t = u.get_reset_password_token(expires_in=-1)
++    assert User.verify_reset_password_token(t) is None
++
++
++def test_UT10_token_reset_manipulado(make_user):
++    make_user()
++    assert User.verify_reset_password_token('abc.def.ghi') is None
++
++
++def test_UT11_token_api_se_reutiliza_si_vigente(make_user):
++    u = make_user()
++    t1 = u.get_token(); db.session.commit()
++    t2 = u.get_token()
++    assert t1 == t2
++
++
++def test_UT12_revocar_token_invalida_acceso(make_user):
++    u = make_user()
++    t = u.get_token(); db.session.commit()
++    u.revoke_token(); db.session.commit()
++    assert User.check_token(t) is None
++
++
++def test_UT13_to_dict_no_expone_email_por_defecto(make_user):
++    u = make_user()
++    from flask import current_app
++    with current_app.test_request_context():
++        assert 'email' not in u.to_dict()
++        assert u.to_dict(include_email=True)['email'] == u.email
++
++
++@pytest.mark.parametrize('n,ok', [(0, True), (139, True), (140, True)])
++def test_UT14_post_longitud_limite_modelo(make_user, n, ok):
++    u = make_user()
++    p = Post(body='x' * n, author=u)
++    db.session.add(p); db.session.commit()
++    assert p.id is not None
++
++
++def test_UT15_cli_rechaza_codigo_de_idioma_malicioso(app):
++    """Regresion BUG-10: el comando 'translate init' no debe ejecutar comandos de shell."""
++    runner = app.test_cli_runner()
++    r = runner.invoke(args=['translate', 'init', 'es; touch /tmp/pwned'])
++    assert r.exit_code != 0
++    import os
++    assert not os.path.exists('/tmp/pwned')
+-- 
+2.43.0
+

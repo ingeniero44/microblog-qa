@@ -1,0 +1,73 @@
+From 3a7102fc44b2ac5aef7e551a2311faddd3b1d09e Mon Sep 17 00:00:00 2001
+From: Equipo QA <qa@example.com>
+Date: Thu, 22 Oct 2026 00:51:06 +0000
+Subject: [PATCH 01/10] fix(api): validar cuerpo JSON, email, username,
+ about_me y password en POST/PUT /api/users (BUG-01,02,03,04,07)
+
+---
+ app/api/users.py | 35 +++++++++++++++++++++++++++++++++++
+ 1 file changed, 35 insertions(+)
+
+diff --git a/app/api/users.py b/app/api/users.py
+index 8a0b59e..a45ef87 100644
+--- a/app/api/users.py
++++ b/app/api/users.py
+@@ -5,6 +5,35 @@ from app.models import User
+ from app.api import bp
+ from app.api.auth import token_auth
+ from app.api.errors import bad_request
++from email_validator import validate_email, EmailNotValidError
++
++MIN_PASSWORD_LENGTH = 8
++
++
++def validate_user_payload(data, partial=False):
++    """Devuelve un mensaje de error (str) o None si el cuerpo JSON es valido."""
++    if not isinstance(data, dict):
++        return 'request body must be a JSON object'
++    if 'username' in data:
++        u = data['username']
++        if not isinstance(u, str) or not u.strip() or len(u) > 64:
++            return 'username must be a non-empty string of at most 64 characters'
++    if 'email' in data:
++        e = data['email']
++        if not isinstance(e, str) or len(e) > 120:
++            return 'email must be a valid address of at most 120 characters'
++        try:
++            validate_email(e, check_deliverability=False)
++        except EmailNotValidError:
++            return 'email must be a valid address'
++    if 'about_me' in data and data['about_me'] is not None:
++        if not isinstance(data['about_me'], str) or len(data['about_me']) > 140:
++            return 'about_me must be a string of at most 140 characters'
++    if 'password' in data:
++        pw = data['password']
++        if not isinstance(pw, str) or len(pw) < MIN_PASSWORD_LENGTH:
++            return f'password must have at least {MIN_PASSWORD_LENGTH} characters'
++    return None
+ 
+ 
+ @bp.route('/users/<int:id>', methods=['GET'])
+@@ -45,6 +74,9 @@ def get_following(id):
+ @bp.route('/users', methods=['POST'])
+ def create_user():
+     data = request.get_json()
++    error = validate_user_payload(data)
++    if error:
++        return bad_request(error)
+     if 'username' not in data or 'email' not in data or 'password' not in data:
+         return bad_request('must include username, email and password fields')
+     if db.session.scalar(sa.select(User).where(
+@@ -68,6 +100,9 @@ def update_user(id):
+         abort(403)
+     user = db.get_or_404(User, id)
+     data = request.get_json()
++    error = validate_user_payload(data, partial=True)
++    if error:
++        return bad_request(error)
+     if 'username' in data and data['username'] != user.username and \
+         db.session.scalar(sa.select(User).where(
+             User.username == data['username'])):
+-- 
+2.43.0
+

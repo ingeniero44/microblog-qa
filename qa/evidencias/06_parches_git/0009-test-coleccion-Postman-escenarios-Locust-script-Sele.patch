@@ -1,0 +1,689 @@
+From 4cb80ae96baf14776c20c93faec088490f8f9332 Mon Sep 17 00:00:00 2001
+From: Equipo QA <qa@example.com>
+Date: Thu, 22 Oct 2026 00:57:51 +0000
+Subject: [PATCH 09/10] test: coleccion Postman, escenarios Locust, script
+ Selenium y artefactos Scrum
+
+---
+ qa/conftest.py                                |   4 +
+ .../microblog_api.postman_collection.json     | 454 ++++++++++++++++++
+ qa/rendimiento/locustfile.py                  |  47 ++
+ qa/rendimiento/seed.py                        |  18 +
+ qa/scrum/plantillas_actas.md                  |  24 +
+ qa/scrum/product_backlog.csv                  |  14 +
+ qa/selenium/test_selenium_flujo.py            |  58 +++
+ 7 files changed, 619 insertions(+)
+ create mode 100644 qa/postman/microblog_api.postman_collection.json
+ create mode 100644 qa/rendimiento/locustfile.py
+ create mode 100644 qa/rendimiento/seed.py
+ create mode 100644 qa/scrum/plantillas_actas.md
+ create mode 100644 qa/scrum/product_backlog.csv
+ create mode 100644 qa/selenium/test_selenium_flujo.py
+
+diff --git a/qa/conftest.py b/qa/conftest.py
+index 4673041..f63c948 100644
+--- a/qa/conftest.py
++++ b/qa/conftest.py
+@@ -55,3 +55,7 @@ def api_token(client, make_user):
+         r = client.post('/api/tokens', headers={'Authorization': f'Basic {cred}'})
+         return r.get_json()['token']
+     return _tok
++
++
++# Selenium requiere navegador: se ejecuta aparte (ver qa/selenium)
++collect_ignore = ['selenium', 'rendimiento', 'postman']
+diff --git a/qa/postman/microblog_api.postman_collection.json b/qa/postman/microblog_api.postman_collection.json
+new file mode 100644
+index 0000000..6b1d9f9
+--- /dev/null
++++ b/qa/postman/microblog_api.postman_collection.json
+@@ -0,0 +1,454 @@
++{
++  "info": {
++    "name": "Microblog QA - API",
++    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
++  },
++  "item": [
++    {
++      "name": "PM-01 Crear usuario (201)",
++      "request": {
++        "method": "POST",
++        "header": [
++          {
++            "key": "Content-Type",
++            "value": "application/json"
++          }
++        ],
++        "url": {
++          "raw": "{{base}}/api/users",
++          "host": [
++            "{{base}}"
++          ],
++          "path": [
++            "api",
++            "users"
++          ]
++        },
++        "body": {
++          "mode": "raw",
++          "raw": "{\"username\": \"postman1\", \"email\": \"postman1@example.com\", \"password\": \"Clave123*\"}"
++        }
++      },
++      "event": [
++        {
++          "listen": "test",
++          "script": {
++            "type": "text/javascript",
++            "exec": [
++              "pm.test(\"201 Created\", () => pm.response.to.have.status(201));",
++              "pm.test(\"devuelve username\", () => pm.expect(pm.response.json().username).to.eql(\"postman1\"));"
++            ]
++          }
++        }
++      ]
++    },
++    {
++      "name": "PM-02 Email invalido (400)",
++      "request": {
++        "method": "POST",
++        "header": [
++          {
++            "key": "Content-Type",
++            "value": "application/json"
++          }
++        ],
++        "url": {
++          "raw": "{{base}}/api/users",
++          "host": [
++            "{{base}}"
++          ],
++          "path": [
++            "api",
++            "users"
++          ]
++        },
++        "body": {
++          "mode": "raw",
++          "raw": "{\"username\": \"postman2\", \"email\": \"no-es-correo\", \"password\": \"Clave123*\"}"
++        }
++      },
++      "event": [
++        {
++          "listen": "test",
++          "script": {
++            "type": "text/javascript",
++            "exec": [
++              "pm.test(\"400 Bad Request\", () => pm.response.to.have.status(400));"
++            ]
++          }
++        }
++      ]
++    },
++    {
++      "name": "PM-03 Password corta (400)",
++      "request": {
++        "method": "POST",
++        "header": [
++          {
++            "key": "Content-Type",
++            "value": "application/json"
++          }
++        ],
++        "url": {
++          "raw": "{{base}}/api/users",
++          "host": [
++            "{{base}}"
++          ],
++          "path": [
++            "api",
++            "users"
++          ]
++        },
++        "body": {
++          "mode": "raw",
++          "raw": "{\"username\": \"postman3\", \"email\": \"p3@example.com\", \"password\": \"1\"}"
++        }
++      },
++      "event": [
++        {
++          "listen": "test",
++          "script": {
++            "type": "text/javascript",
++            "exec": [
++              "pm.test(\"400 Bad Request\", () => pm.response.to.have.status(400));"
++            ]
++          }
++        }
++      ]
++    },
++    {
++      "name": "PM-04 Obtener token (200)",
++      "request": {
++        "method": "POST",
++        "header": [
++          {
++            "key": "Content-Type",
++            "value": "application/json"
++          }
++        ],
++        "url": {
++          "raw": "{{base}}/api/tokens",
++          "host": [
++            "{{base}}"
++          ],
++          "path": [
++            "api",
++            "tokens"
++          ]
++        },
++        "auth": {
++          "type": "basic",
++          "basic": [
++            {
++              "key": "username",
++              "value": "postman1"
++            },
++            {
++              "key": "password",
++              "value": "Clave123*"
++            }
++          ]
++        }
++      },
++      "event": [
++        {
++          "listen": "test",
++          "script": {
++            "type": "text/javascript",
++            "exec": [
++              "pm.test(\"200 OK\", () => pm.response.to.have.status(200));",
++              "pm.test(\"token de 32 caracteres\", () => pm.expect(pm.response.json().token).to.have.lengthOf(32));",
++              "pm.collectionVariables.set(\"token\", pm.response.json().token);"
++            ]
++          }
++        }
++      ]
++    },
++    {
++      "name": "PM-05 Listar usuarios con token (200)",
++      "request": {
++        "method": "GET",
++        "header": [
++          {
++            "key": "Content-Type",
++            "value": "application/json"
++          },
++          {
++            "key": "Authorization",
++            "value": "Bearer {{token}}"
++          }
++        ],
++        "url": {
++          "raw": "{{base}}/api/users",
++          "host": [
++            "{{base}}"
++          ],
++          "path": [
++            "api",
++            "users"
++          ]
++        }
++      },
++      "event": [
++        {
++          "listen": "test",
++          "script": {
++            "type": "text/javascript",
++            "exec": [
++              "pm.test(\"200 OK\", () => pm.response.to.have.status(200));",
++              "pm.test(\"responde en menos de 800 ms\", () => pm.expect(pm.response.responseTime).to.be.below(800));",
++              "pm.test(\"incluye _meta\", () => pm.expect(pm.response.json()).to.have.property(\"_meta\"));"
++            ]
++          }
++        }
++      ]
++    },
++    {
++      "name": "PM-06 Listar usuarios sin token (401)",
++      "request": {
++        "method": "GET",
++        "header": [
++          {
++            "key": "Content-Type",
++            "value": "application/json"
++          }
++        ],
++        "url": {
++          "raw": "{{base}}/api/users",
++          "host": [
++            "{{base}}"
++          ],
++          "path": [
++            "api",
++            "users"
++          ]
++        }
++      },
++      "event": [
++        {
++          "listen": "test",
++          "script": {
++            "type": "text/javascript",
++            "exec": [
++              "pm.test(\"401 Unauthorized\", () => pm.response.to.have.status(401));"
++            ]
++          }
++        }
++      ]
++    },
++    {
++      "name": "PM-07 Actualizar perfil propio (200)",
++      "request": {
++        "method": "PUT",
++        "header": [
++          {
++            "key": "Content-Type",
++            "value": "application/json"
++          },
++          {
++            "key": "Authorization",
++            "value": "Bearer {{token}}"
++          }
++        ],
++        "url": {
++          "raw": "{{base}}/api/users/{{uid}}",
++          "host": [
++            "{{base}}"
++          ],
++          "path": [
++            "api",
++            "users",
++            "{{uid}}"
++          ]
++        },
++        "body": {
++          "mode": "raw",
++          "raw": "{\"about_me\": \"Hola desde Postman\"}"
++        }
++      },
++      "event": [
++        {
++          "listen": "test",
++          "script": {
++            "type": "text/javascript",
++            "exec": [
++              "pm.test(\"200 OK\", () => pm.response.to.have.status(200));",
++              "pm.test(\"about_me actualizado\", () => pm.expect(pm.response.json().about_me).to.eql(\"Hola desde Postman\"));"
++            ]
++          }
++        }
++      ]
++    },
++    {
++      "name": "PM-08 about_me > 140 (400)",
++      "request": {
++        "method": "PUT",
++        "header": [
++          {
++            "key": "Content-Type",
++            "value": "application/json"
++          },
++          {
++            "key": "Authorization",
++            "value": "Bearer {{token}}"
++          }
++        ],
++        "url": {
++          "raw": "{{base}}/api/users/{{uid}}",
++          "host": [
++            "{{base}}"
++          ],
++          "path": [
++            "api",
++            "users",
++            "{{uid}}"
++          ]
++        },
++        "body": {
++          "mode": "raw",
++          "raw": "{\"about_me\": \"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\"}"
++        }
++      },
++      "event": [
++        {
++          "listen": "test",
++          "script": {
++            "type": "text/javascript",
++            "exec": [
++              "pm.test(\"400 Bad Request\", () => pm.response.to.have.status(400));"
++            ]
++          }
++        }
++      ]
++    },
++    {
++      "name": "PM-09 Health check (200)",
++      "request": {
++        "method": "GET",
++        "header": [
++          {
++            "key": "Content-Type",
++            "value": "application/json"
++          }
++        ],
++        "url": {
++          "raw": "{{base}}/api/health",
++          "host": [
++            "{{base}}"
++          ],
++          "path": [
++            "api",
++            "health"
++          ]
++        }
++      },
++      "event": [
++        {
++          "listen": "test",
++          "script": {
++            "type": "text/javascript",
++            "exec": [
++              "pm.test(\"200 OK\", () => pm.response.to.have.status(200));",
++              "pm.test(\"status ok\", () => pm.expect(pm.response.json().status).to.eql(\"ok\"));"
++            ]
++          }
++        }
++      ]
++    },
++    {
++      "name": "PM-10 Cabeceras de seguridad",
++      "request": {
++        "method": "GET",
++        "header": [
++          {
++            "key": "Content-Type",
++            "value": "application/json"
++          }
++        ],
++        "url": {
++          "raw": "{{base}}/api/health",
++          "host": [
++            "{{base}}"
++          ],
++          "path": [
++            "api",
++            "health"
++          ]
++        }
++      },
++      "event": [
++        {
++          "listen": "test",
++          "script": {
++            "type": "text/javascript",
++            "exec": [
++              "pm.test(\"X-Content-Type-Options\", () => pm.response.to.have.header(\"X-Content-Type-Options\"));",
++              "pm.test(\"X-Frame-Options\", () => pm.response.to.have.header(\"X-Frame-Options\"));",
++              "pm.test(\"Content-Security-Policy\", () => pm.response.to.have.header(\"Content-Security-Policy\"));"
++            ]
++          }
++        }
++      ]
++    },
++    {
++      "name": "PM-11 Fuerza bruta: bloqueo 429",
++      "request": {
++        "method": "POST",
++        "header": [
++          {
++            "key": "Content-Type",
++            "value": "application/json"
++          }
++        ],
++        "url": {
++          "raw": "{{base}}/api/tokens",
++          "host": [
++            "{{base}}"
++          ],
++          "path": [
++            "api",
++            "tokens"
++          ]
++        },
++        "auth": {
++          "type": "basic",
++          "basic": [
++            {
++              "key": "username",
++              "value": "postman1"
++            },
++            {
++              "key": "password",
++              "value": "mala"
++            }
++          ]
++        }
++      },
++      "event": [
++        {
++          "listen": "test",
++          "script": {
++            "type": "text/javascript",
++            "exec": [
++              "pm.test(\"401 o 429\", () => pm.expect([401,429]).to.include(pm.response.code));"
++            ]
++          }
++        }
++      ]
++    }
++  ],
++  "variable": [
++    {
++      "key": "base",
++      "value": "http://127.0.0.1:8200"
++    },
++    {
++      "key": "token",
++      "value": ""
++    },
++    {
++      "key": "uid",
++      "value": "1"
++    }
++  ]
++}
+\ No newline at end of file
+diff --git a/qa/rendimiento/locustfile.py b/qa/rendimiento/locustfile.py
+new file mode 100644
+index 0000000..73143ef
+--- /dev/null
++++ b/qa/rendimiento/locustfile.py
+@@ -0,0 +1,47 @@
++"""Pruebas de RENDIMIENTO (Locust). Escenarios PF-01..PF-04"""
++import re
++import itertools
++_cuentas = itertools.count(0)
++from locust import HttpUser, task, between
++
++
++class UsuarioWeb(HttpUser):
++    weight = 3
++    wait_time = between(0.5, 1.5)
++
++    def on_start(self):
++        r = self.client.get('/auth/login', name='PF-01 GET /auth/login')
++        token = re.search(r'name="csrf_token"[^>]*value="([^"]+)"', r.text).group(1)
++        n = (next(_cuentas) % 20) + 1
++        self.client.post('/auth/login', data={'csrf_token': token, 'username': f'user{n}',
++                                              'password': 'Clave123*'}, name='PF-01 POST /auth/login')
++
++    @task(5)
++    def explorar(self):
++        self.client.get('/explore', name='PF-02 GET /explore')
++
++    @task(3)
++    def inicio(self):
++        self.client.get('/index', name='PF-02 GET /index')
++
++    @task(2)
++    def perfil(self):
++        self.client.get('/user/user1', name='PF-02 GET /user/<u>')
++
++
++class UsuarioApi(HttpUser):
++    weight = 2
++    wait_time = between(0.2, 1.0)
++
++    def on_start(self):
++        n = 21 + (next(_cuentas) % 20)
++        r = self.client.post('/api/tokens', auth=(f'user{n}', 'Clave123*'), name='PF-03 POST /api/tokens')
++        self.h = {'Authorization': 'Bearer ' + r.json()['token']} if r.status_code == 200 else {}
++
++    @task(4)
++    def listar(self):
++        self.client.get('/api/users?per_page=50', headers=self.h, name='PF-04 GET /api/users')
++
++    @task(1)
++    def usuario(self):
++        self.client.get('/api/users/1', headers=self.h, name='PF-04 GET /api/users/<id>')
+diff --git a/qa/rendimiento/seed.py b/qa/rendimiento/seed.py
+new file mode 100644
+index 0000000..402d766
+--- /dev/null
++++ b/qa/rendimiento/seed.py
+@@ -0,0 +1,18 @@
++import sys, os
++sys.path.insert(0, os.getcwd())
++from app import create_app, db
++from app.models import User, Post
++app = create_app()
++with app.app_context():
++    db.drop_all(); db.create_all()
++    users = []
++    for i in range(1, 41):
++        u = User(username=f'user{i}', email=f'user{i}@example.com'); u.set_password('Clave123*'); users.append(u)
++    db.session.add_all(users); db.session.commit()
++    for i in range(400):
++        db.session.add(Post(body=f'Publicacion de prueba numero {i}', author=users[i % 40]))
++    db.session.commit()
++    for u in users[1:]:
++        users[0].follow(u); u.follow(users[0])
++    db.session.commit()
++    print('seed ok', db.session.query(User).count(), db.session.query(Post).count())
+diff --git a/qa/scrum/plantillas_actas.md b/qa/scrum/plantillas_actas.md
+new file mode 100644
+index 0000000..47e52f8
+--- /dev/null
++++ b/qa/scrum/plantillas_actas.md
+@@ -0,0 +1,24 @@
++# Plantillas de actas Scrum (COMPLETAR con las reuniones REALES de tu equipo)
++
++Estas plantillas estan vacias a proposito: las reuniones, fechas y asistentes deben ser los reales de tu grupo.
++Adjunta capturas del tablero (Trello, Jira o GitHub Projects) y evidencia de cada reunion.
++
++## Planeacion del Sprint N
++- Fecha / hora / medio:
++- Asistentes:
++- Meta del sprint:
++- Historias seleccionadas (ID y puntos):
++- Responsables:
++
++## Daily (15 min), registro semanal
++| Fecha | Que hice | Que hare | Impedimentos |
++|---|---|---|---|
++
++## Revision del Sprint (demo)
++- Fecha:
++- Incremento demostrado:
++- Retroalimentacion del Product Owner:
++
++## Retrospectiva
++| Que salio bien | Que mejorar | Acciones (responsable y fecha) |
++|---|---|---|
+diff --git a/qa/scrum/product_backlog.csv b/qa/scrum/product_backlog.csv
+new file mode 100644
+index 0000000..f3e34c9
+--- /dev/null
++++ b/qa/scrum/product_backlog.csv
+@@ -0,0 +1,14 @@
++ID,Historia de usuario,Prioridad,Puntos,Sprint,Estado,Evidencia
++HU-01,Como equipo quiero un plan de pruebas aprobado para guiar la ejecucion,Alta,3,1,Hecho,Informe seccion 3
++HU-02,Como desarrollador quiero pruebas unitarias automatizadas de los modelos,Alta,5,1,Hecho,qa/test_unit.py
++HU-03,Como equipo quiero pruebas de integracion de la API REST,Alta,5,1,Hecho,qa/test_integration_api.py
++HU-04,Como equipo quiero pruebas de sistema y aceptacion de los flujos web,Alta,5,2,Hecho,qa/test_system_acceptance.py
++HU-05,Como equipo quiero pruebas de seguridad basadas en OWASP Top 10,Alta,5,2,Hecho,qa/test_security.py
++HU-06,Como equipo quiero pruebas de carga con Locust,Media,3,2,Hecho,qa/rendimiento + evidencias/04_rendimiento
++HU-07,Como equipo quiero una coleccion Postman ejecutable con Newman,Media,2,2,Hecho,qa/postman + evidencias/05_postman
++HU-08,Como equipo quiero pruebas de interfaz con Selenium,Media,3,2,Pendiente de ejecucion por el estudiante,qa/selenium
++HU-09,Como equipo quiero corregir los defectos priorizados BUG-01 a BUG-10,Alta,8,3,Hecho,Commits de la rama qa/mantenimiento-correctivo
++HU-10,Como equipo quiero un pipeline CI/CD que ejecute las pruebas,Media,3,3,Hecho,.github/workflows/ci.yml
++HU-11,Como operador quiero un endpoint de salud para monitoreo (EV-01),Baja,2,3,Hecho,app/api/health.py + IT20
++HU-12,Como equipo quiero actualizar dependencias vulnerables (AD-01),Alta,5,Siguiente,Backlog,pip_audit.txt (95 vulnerabilidades)
++HU-13,Como usuario quiero notificaciones por correo de actividad (EV-02),Baja,8,Siguiente,Backlog,Propuesta
+diff --git a/qa/selenium/test_selenium_flujo.py b/qa/selenium/test_selenium_flujo.py
+new file mode 100644
+index 0000000..b6f2ea6
+--- /dev/null
++++ b/qa/selenium/test_selenium_flujo.py
+@@ -0,0 +1,58 @@
++"""Pruebas de SISTEMA con Selenium WebDriver (ST-S01..ST-S03).
++NO fueron ejecutadas por el asistente (el entorno no tiene navegador). Ejecutalas en tu equipo:
++    pip install selenium pytest
++    (en otra terminal) flask run --port 5000      # con la app corriendo y BD vacia
++    pytest qa/selenium -v
++Selenium 4.6+ descarga el driver automaticamente (Selenium Manager)."""
++import uuid
++import pytest
++from selenium import webdriver
++from selenium.webdriver.common.by import By
++from selenium.webdriver.support.ui import WebDriverWait
++from selenium.webdriver.support import expected_conditions as EC
++
++BASE = 'http://127.0.0.1:5000'
++
++
++@pytest.fixture
++def driver():
++    opts = webdriver.ChromeOptions()
++    opts.add_argument('--headless=new')
++    d = webdriver.Chrome(options=opts)
++    d.implicitly_wait(3)
++    yield d
++    d.quit()
++
++
++def registrar_y_entrar(d, usuario, clave='Clave123*'):
++    d.get(f'{BASE}/auth/register')
++    d.find_element(By.ID, 'username').send_keys(usuario)
++    d.find_element(By.ID, 'email').send_keys(f'{usuario}@example.com')
++    d.find_element(By.ID, 'password').send_keys(clave)
++    d.find_element(By.ID, 'password2').send_keys(clave)
++    d.find_element(By.ID, 'submit').click()
++    d.find_element(By.ID, 'username').send_keys(usuario)
++    d.find_element(By.ID, 'password').send_keys(clave)
++    d.find_element(By.ID, 'submit').click()
++
++
++def test_ST_S01_registro_login_y_publicacion(driver):
++    registrar_y_entrar(driver, 'sel_' + uuid.uuid4().hex[:6])
++    WebDriverWait(driver, 5).until(EC.presence_of_element_located((By.ID, 'post')))
++    driver.find_element(By.ID, 'post').send_keys('Hola desde Selenium')
++    driver.find_element(By.ID, 'submit').click()
++    assert 'Hola desde Selenium' in driver.page_source
++    driver.save_screenshot('evidencia_ST_S01.png')
++
++
++def test_ST_S02_login_invalido(driver):
++    driver.get(f'{BASE}/auth/login')
++    driver.find_element(By.ID, 'username').send_keys('noexiste')
++    driver.find_element(By.ID, 'password').send_keys('mala')
++    driver.find_element(By.ID, 'submit').click()
++    assert 'Invalid username or password' in driver.page_source
++
++
++def test_ST_S03_ruta_privada_redirige(driver):
++    driver.get(f'{BASE}/explore')
++    assert '/auth/login' in driver.current_url
+-- 
+2.43.0
+

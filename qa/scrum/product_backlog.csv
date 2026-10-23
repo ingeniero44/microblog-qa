@@ -1,0 +1,14 @@
+ID,Historia de usuario,Prioridad,Puntos,Sprint,Estado,Evidencia
+HU-01,Como equipo quiero un plan de pruebas aprobado para guiar la ejecucion,Alta,3,1,Hecho,Informe seccion 3
+HU-02,Como desarrollador quiero pruebas unitarias automatizadas de los modelos,Alta,5,1,Hecho,qa/test_unit.py
+HU-03,Como equipo quiero pruebas de integracion de la API REST,Alta,5,1,Hecho,qa/test_integration_api.py
+HU-04,Como equipo quiero pruebas de sistema y aceptacion de los flujos web,Alta,5,2,Hecho,qa/test_system_acceptance.py
+HU-05,Como equipo quiero pruebas de seguridad basadas en OWASP Top 10,Alta,5,2,Hecho,qa/test_security.py
+HU-06,Como equipo quiero pruebas de carga con Locust,Media,3,2,Hecho,qa/rendimiento + evidencias/04_rendimiento
+HU-07,Como equipo quiero una coleccion Postman ejecutable con Newman,Media,2,2,Hecho,qa/postman + evidencias/05_postman
+HU-08,Como equipo quiero pruebas de interfaz con Selenium,Media,3,2,Pendiente de ejecucion por el estudiante,qa/selenium
+HU-09,Como equipo quiero corregir los defectos priorizados BUG-01 a BUG-10,Alta,8,3,Hecho,Commits de la rama qa/mantenimiento-correctivo
+HU-10,Como equipo quiero un pipeline CI/CD que ejecute las pruebas,Media,3,3,Hecho,.github/workflows/ci.yml
+HU-11,Como operador quiero un endpoint de salud para monitoreo (EV-01),Baja,2,3,Hecho,app/api/health.py + IT20
+HU-12,Como equipo quiero actualizar dependencias vulnerables (AD-01),Alta,5,Siguiente,Backlog,pip_audit.txt (95 vulnerabilidades)
+HU-13,Como usuario quiero notificaciones por correo de actividad (EV-02),Baja,8,Siguiente,Backlog,Propuesta

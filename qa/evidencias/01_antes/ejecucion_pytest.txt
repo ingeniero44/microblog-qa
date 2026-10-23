@@ -1,0 +1,310 @@
+============================= test session starts ==============================
+collecting ... collected 68 items
+
+qa/test_integration_api.py::test_IT01_crear_usuario_201 PASSED           [  1%]
+qa/test_integration_api.py::test_IT02_crear_usuario_campos_faltantes_400 PASSED [  2%]
+qa/test_integration_api.py::test_IT03_crear_usuario_duplicado_400 PASSED [  4%]
+qa/test_integration_api.py::test_IT04_token_con_credenciales_validas PASSED [  5%]
+qa/test_integration_api.py::test_IT05_token_con_credenciales_invalidas_401 PASSED [  7%]
+qa/test_integration_api.py::test_IT06_listar_usuarios_sin_token_401 PASSED [  8%]
+qa/test_integration_api.py::test_IT07_listar_usuarios_con_token_200 PASSED [ 10%]
+qa/test_integration_api.py::test_IT08_per_page_limitado_a_100 PASSED     [ 11%]
+qa/test_integration_api.py::test_IT09_obtener_usuario_inexistente_404 PASSED [ 13%]
+qa/test_integration_api.py::test_IT10_actualizar_otro_usuario_403 PASSED [ 14%]
+qa/test_integration_api.py::test_IT11_actualizar_propio_perfil_200 PASSED [ 16%]
+qa/test_integration_api.py::test_IT12_revocar_token_y_reusar_401 PASSED  [ 17%]
+qa/test_integration_api.py::test_IT13_seguidores_paginados PASSED        [ 19%]
+qa/test_integration_api.py::test_IT14_crear_usuario_email_invalido_deberia_400 FAILED [ 20%]
+qa/test_integration_api.py::test_IT15_crear_usuario_username_vacio_deberia_400 FAILED [ 22%]
+qa/test_integration_api.py::test_IT16_crear_usuario_cuerpo_json_null_no_debe_dar_500 FAILED [ 23%]
+qa/test_integration_api.py::test_IT17_crear_usuario_cuerpo_lista_no_debe_dar_500 PASSED [ 25%]
+qa/test_integration_api.py::test_IT18_actualizar_con_about_me_mayor_140_deberia_400 FAILED [ 26%]
+qa/test_integration_api.py::test_IT19_actualizar_username_vacio_deberia_400 FAILED [ 27%]
+qa/test_security.py::test_SEC01_inyeccion_sql_en_login_no_autentica PASSED [ 29%]
+qa/test_security.py::test_SEC02_inyeccion_sql_en_url_de_usuario PASSED   [ 30%]
+qa/test_security.py::test_SEC03_xss_en_about_me_escapado PASSED          [ 32%]
+qa/test_security.py::test_SEC04_contrasenas_con_hash_salado PASSED       [ 33%]
+qa/test_security.py::test_SEC05_rutas_privadas_requieren_sesion PASSED   [ 35%]
+qa/test_security.py::test_SEC06_csrf_activo_por_defecto PASSED           [ 36%]
+qa/test_security.py::test_SEC07_open_redirect_con_next_netloc_bloqueado PASSED [ 38%]
+qa/test_security.py::test_SEC08_open_redirect_con_barra_invertida PASSED [ 39%]
+qa/test_security.py::test_SEC09_secret_key_por_defecto_no_deberia_usarse FAILED [ 41%]
+qa/test_security.py::test_SEC10_token_de_reset_falsificable_con_clave_por_defecto FAILED [ 42%]
+qa/test_security.py::test_SEC11_fuerza_bruta_api_sin_bloqueo FAILED      [ 44%]
+qa/test_security.py::test_SEC12_politica_de_contrasena_minima FAILED     [ 45%]
+qa/test_security.py::test_SEC13_cabeceras_de_seguridad_http FAILED       [ 47%]
+qa/test_security.py::test_SEC14_enumeracion_de_usuarios_en_reset PASSED  [ 48%]
+qa/test_system_acceptance.py::test_ST01_flujo_registro_login_publicar PASSED [ 50%]
+qa/test_system_acceptance.py::test_ST02_pagina_privada_redirige_a_login PASSED [ 51%]
+qa/test_system_acceptance.py::test_ST03_login_invalido_muestra_error PASSED [ 52%]
+qa/test_system_acceptance.py::test_ST04_registro_passwords_distintas_rechazado PASSED [ 54%]
+qa/test_system_acceptance.py::test_ST05_registro_email_invalido_rechazado PASSED [ 55%]
+qa/test_system_acceptance.py::test_ST06_post_vacio_rechazado PASSED      [ 57%]
+qa/test_system_acceptance.py::test_ST07_post_mayor_140_rechazado PASSED  [ 58%]
+qa/test_system_acceptance.py::test_ST08_seguir_y_dejar_de_seguir PASSED  [ 60%]
+qa/test_system_acceptance.py::test_ST09_no_puede_seguirse_a_si_mismo PASSED [ 61%]
+qa/test_system_acceptance.py::test_ST10_editar_perfil PASSED             [ 63%]
+qa/test_system_acceptance.py::test_ST11_nombre_usuario_duplicado_en_edicion PASSED [ 64%]
+qa/test_system_acceptance.py::test_ST12_explorar_muestra_posts_de_todos PASSED [ 66%]
+qa/test_system_acceptance.py::test_ST13_logout_cierra_sesion PASSED      [ 67%]
+qa/test_system_acceptance.py::test_ST14_usuario_inexistente_404 PASSED   [ 69%]
+qa/test_system_acceptance.py::test_ST15_xss_en_post_es_escapado PASSED   [ 70%]
+qa/test_system_acceptance.py::test_AT01_un_usuario_nuevo_puede_registrarse_e_ingresar PASSED [ 72%]
+qa/test_system_acceptance.py::test_AT02_el_inicio_muestra_solo_posts_propios_y_de_seguidos PASSED [ 73%]
+qa/test_system_acceptance.py::test_AT03_la_paginacion_limita_a_25_posts PASSED [ 75%]
+qa/test_system_acceptance.py::test_AT04_el_idioma_es_se_aplica_con_accept_language PASSED [ 76%]
+qa/test_unit.py::test_UT01_password_hash_no_es_texto_plano PASSED        [ 77%]
+qa/test_unit.py::test_UT02_password_incorrecta_rechazada PASSED          [ 79%]
+qa/test_unit.py::test_UT03_avatar_usa_email_en_minusculas PASSED         [ 80%]
+qa/test_unit.py::test_UT04_avatar_incluye_tamano PASSED                  [ 82%]
+qa/test_unit.py::test_UT05_follow_y_unfollow PASSED                      [ 83%]
+qa/test_unit.py::test_UT06_follow_duplicado_no_duplica PASSED            [ 85%]
+qa/test_unit.py::test_UT07_following_posts_orden_y_contenido PASSED      [ 86%]
+qa/test_unit.py::test_UT08_token_reset_valido PASSED                     [ 88%]
+qa/test_unit.py::test_UT09_token_reset_expirado PASSED                   [ 89%]
+qa/test_unit.py::test_UT10_token_reset_manipulado PASSED                 [ 91%]
+qa/test_unit.py::test_UT11_token_api_se_reutiliza_si_vigente PASSED      [ 92%]
+qa/test_unit.py::test_UT12_revocar_token_invalida_acceso PASSED          [ 94%]
+qa/test_unit.py::test_UT13_to_dict_no_expone_email_por_defecto PASSED    [ 95%]
+qa/test_unit.py::test_UT14_post_longitud_limite_modelo[0-True] PASSED    [ 97%]
+qa/test_unit.py::test_UT14_post_longitud_limite_modelo[139-True] PASSED  [ 98%]
+qa/test_unit.py::test_UT14_post_longitud_limite_modelo[140-True] PASSED  [100%]
+
+=================================== FAILURES ===================================
+______________ test_IT14_crear_usuario_email_invalido_deberia_400 ______________
+
+client = <FlaskClient <Flask 'app'>>
+
+    def test_IT14_crear_usuario_email_invalido_deberia_400(client):
+        r = client.post('/api/users', json={'username': 'x', 'email': 'esto-no-es-correo', 'password': 'abc'})
+>       assert r.status_code == 400, f'API acepto un email invalido (status {r.status_code})'
+E       AssertionError: API acepto un email invalido (status 201)
+E       assert 201 == 400
+E        +  where 201 = <WrapperTestResponse streamed [201 CREATED]>.status_code
+
+qa/test_integration_api.py:93: AssertionError
+______________ test_IT15_crear_usuario_username_vacio_deberia_400 ______________
+
+client = <FlaskClient <Flask 'app'>>
+
+    def test_IT15_crear_usuario_username_vacio_deberia_400(client):
+        r = client.post('/api/users', json={'username': '', 'email': 'v@e.com', 'password': 'abc'})
+>       assert r.status_code == 400, f'API acepto username vacio (status {r.status_code})'
+E       AssertionError: API acepto username vacio (status 201)
+E       assert 201 == 400
+E        +  where 201 = <WrapperTestResponse streamed [201 CREATED]>.status_code
+
+qa/test_integration_api.py:98: AssertionError
+___________ test_IT16_crear_usuario_cuerpo_json_null_no_debe_dar_500 ___________
+
+client = <FlaskClient <Flask 'app'>>
+
+    def test_IT16_crear_usuario_cuerpo_json_null_no_debe_dar_500(client):
+>       r = client.post('/api/users', data='null', content_type='application/json')
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+qa/test_integration_api.py:102: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../venv/lib/python3.12/site-packages/werkzeug/test.py:1171: in post
+    return self.open(*args, **kw)
+           ^^^^^^^^^^^^^^^^^^^^^^
+../venv/lib/python3.12/site-packages/flask/testing.py:232: in open
+    response = super().open(
+../venv/lib/python3.12/site-packages/werkzeug/test.py:1120: in open
+    response_parts = self.run_wsgi_app(request.environ, buffered=buffered)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../venv/lib/python3.12/site-packages/werkzeug/test.py:992: in run_wsgi_app
+    rv = run_wsgi_app(self.application, environ, buffered=buffered)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../venv/lib/python3.12/site-packages/werkzeug/test.py:1268: in run_wsgi_app
+    app_rv = app(environ, start_response)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../venv/lib/python3.12/site-packages/flask/app.py:1478: in __call__
+    return self.wsgi_app(environ, start_response)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../venv/lib/python3.12/site-packages/flask/app.py:1458: in wsgi_app
+    response = self.handle_exception(e)
+               ^^^^^^^^^^^^^^^^^^^^^^^^
+../venv/lib/python3.12/site-packages/flask/app.py:1455: in wsgi_app
+    response = self.full_dispatch_request()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../venv/lib/python3.12/site-packages/flask/app.py:869: in full_dispatch_request
+    rv = self.handle_user_exception(e)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../venv/lib/python3.12/site-packages/flask/app.py:867: in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+../venv/lib/python3.12/site-packages/flask/app.py:852: in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    @bp.route('/users', methods=['POST'])
+    def create_user():
+        data = request.get_json()
+>       if 'username' not in data or 'email' not in data or 'password' not in data:
+           ^^^^^^^^^^^^^^^^^^^^^^
+E       TypeError: argument of type 'NoneType' is not iterable
+
+app/api/users.py:48: TypeError
+___________ test_IT18_actualizar_con_about_me_mayor_140_deberia_400 ____________
+
+client = <FlaskClient <Flask 'app'>>
+make_user = <function make_user.<locals>._make at 0x7f14ff1749a0>
+api_token = <function api_token.<locals>._tok at 0x7f14ff174b80>
+
+    def test_IT18_actualizar_con_about_me_mayor_140_deberia_400(client, make_user, api_token):
+        make_user(); t = api_token()
+        r = client.put('/api/users/1', json={'about_me': 'x' * 500}, headers=bearer(t))
+>       assert r.status_code == 400, f'API acepto about_me de 500 caracteres (status {r.status_code})'
+E       AssertionError: API acepto about_me de 500 caracteres (status 200)
+E       assert 200 == 400
+E        +  where 200 = <WrapperTestResponse streamed [200 OK]>.status_code
+
+qa/test_integration_api.py:114: AssertionError
+_______________ test_IT19_actualizar_username_vacio_deberia_400 ________________
+
+client = <FlaskClient <Flask 'app'>>
+make_user = <function make_user.<locals>._make at 0x7f14ff23f2e0>
+api_token = <function api_token.<locals>._tok at 0x7f14ff1d0a40>
+
+    def test_IT19_actualizar_username_vacio_deberia_400(client, make_user, api_token):
+        make_user(); t = api_token()
+        r = client.put('/api/users/1', json={'username': ''}, headers=bearer(t))
+>       assert r.status_code == 400, f'API acepto username vacio en PUT (status {r.status_code})'
+E       AssertionError: API acepto username vacio en PUT (status 200)
+E       assert 200 == 400
+E        +  where 200 = <WrapperTestResponse streamed [200 OK]>.status_code
+
+qa/test_integration_api.py:120: AssertionError
+_____________ test_SEC09_secret_key_por_defecto_no_deberia_usarse ______________
+
+    def test_SEC09_secret_key_por_defecto_no_deberia_usarse():
+        from config import Config
+>       assert Config.SECRET_KEY != 'you-will-never-guess', 'SECRET_KEY por defecto publica en el repositorio'
+E       AssertionError: SECRET_KEY por defecto publica en el repositorio
+E       assert 'you-will-never-guess' != 'you-will-never-guess'
+E        +  where 'you-will-never-guess' = <class 'config.Config'>.SECRET_KEY
+
+qa/test_security.py:72: AssertionError
+_________ test_SEC10_token_de_reset_falsificable_con_clave_por_defecto _________
+
+client = <FlaskClient <Flask 'app'>>
+make_user = <function make_user.<locals>._make at 0x7f14feea1b20>
+
+    def test_SEC10_token_de_reset_falsificable_con_clave_por_defecto(client, make_user):
+        u = make_user()
+        from config import Config
+        forged = jwt.encode({'reset_password': u.id, 'exp': time.time() + 600}, 'you-will-never-guess', algorithm='HS256')
+        r = client.post(f'/auth/reset_password/{forged}', data={'password': 'hack', 'password2': 'hack'})
+        db.session.expire_all()
+>       assert not db.session.get(User, u.id).check_password('hack'), 'Se pudo restablecer la contrasena con un token falsificado'
+E       AssertionError: Se pudo restablecer la contrasena con un token falsificado
+E       assert not True
+E        +  where True = check_password('hack')
+E        +    where check_password = <User ana>.check_password
+E        +      where <User ana> = get(User, 1)
+E        +        where get = <sqlalchemy.orm.scoping.scoped_session object at 0x7f14ffae89b0>.get
+E        +          where <sqlalchemy.orm.scoping.scoped_session object at 0x7f14ffae89b0> = <SQLAlchemy sqlite://>.session
+E        +        and   1 = <User ana>.id
+
+qa/test_security.py:81: AssertionError
+___________________ test_SEC11_fuerza_bruta_api_sin_bloqueo ____________________
+
+client = <FlaskClient <Flask 'app'>>
+make_user = <function make_user.<locals>._make at 0x7f14feeda980>
+
+    def test_SEC11_fuerza_bruta_api_sin_bloqueo(client, make_user):
+        make_user()
+        cred = lambda p: {'Authorization': 'Basic ' + base64.b64encode(f'ana:{p}'.encode()).decode()}
+        codes = [client.post('/api/tokens', headers=cred(f'intento{i}')).status_code for i in range(50)]
+>       assert 429 in codes, 'Sin limite de intentos: 50 intentos fallidos seguidos sin bloqueo (no hay 429)'
+E       AssertionError: Sin limite de intentos: 50 intentos fallidos seguidos sin bloqueo (no hay 429)
+E       assert 429 in [401, 401, 401, 401, 401, 401, ...]
+
+qa/test_security.py:88: AssertionError
+___________________ test_SEC12_politica_de_contrasena_minima ___________________
+
+client = <FlaskClient <Flask 'app'>>
+
+    def test_SEC12_politica_de_contrasena_minima(client):
+        r = client.post('/api/users', json={'username': 'u', 'email': 'u@e.com', 'password': '1'})
+>       assert r.status_code == 400, 'La API acepta contrasenas de 1 caracter'
+E       AssertionError: La API acepta contrasenas de 1 caracter
+E       assert 201 == 400
+E        +  where 201 = <WrapperTestResponse streamed [201 CREATED]>.status_code
+
+qa/test_security.py:93: AssertionError
+____________________ test_SEC13_cabeceras_de_seguridad_http ____________________
+
+client = <FlaskClient <Flask 'app'>>
+make_user = <function make_user.<locals>._make at 0x7f14ff00f560>
+login = <function login.<locals>._login at 0x7f14ff00f740>
+
+    def test_SEC13_cabeceras_de_seguridad_http(client, make_user, login):
+        make_user(); login()
+        h = client.get('/index').headers
+        faltan = [x for x in ['X-Content-Type-Options', 'X-Frame-Options', 'Content-Security-Policy'] if x not in h]
+>       assert not faltan, f'Cabeceras ausentes: {faltan}'
+E       AssertionError: Cabeceras ausentes: ['X-Content-Type-Options', 'X-Frame-Options', 'Content-Security-Policy']
+E       assert not ['X-Content-Type-Options', 'X-Frame-Options', 'Content-Security-Policy']
+
+qa/test_security.py:100: AssertionError
+=============================== warnings summary ===============================
+qa/test_security.py::test_SEC10_token_de_reset_falsificable_con_clave_por_defecto
+qa/test_security.py::test_SEC14_enumeracion_de_usuarios_en_reset
+qa/test_unit.py::test_UT08_token_reset_valido
+qa/test_unit.py::test_UT09_token_reset_expirado
+  /home/claude/venv/lib/python3.12/site-packages/jwt/api_jwt.py:149: InsecureKeyLengthWarning: The HMAC key is 20 bytes long, which is below the minimum recommended length of 32 bytes for SHA256. See RFC 7518 Section 3.2.
+    return self._jws.encode(
+
+qa/test_security.py::test_SEC10_token_de_reset_falsificable_con_clave_por_defecto
+qa/test_unit.py::test_UT08_token_reset_valido
+qa/test_unit.py::test_UT09_token_reset_expirado
+  /home/claude/venv/lib/python3.12/site-packages/jwt/api_jwt.py:370: InsecureKeyLengthWarning: The HMAC key is 20 bytes long, which is below the minimum recommended length of 32 bytes for SHA256. See RFC 7518 Section 3.2.
+    decoded = self.decode_complete(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+------ generated xml file: /home/claude/microblog/qa/evidencias/junit.xml ------
+================================ tests coverage ================================
+_______________ coverage: platform linux, python 3.12.3-final-0 ________________
+
+Name                     Stmts   Miss  Cover
+--------------------------------------------
+app/__init__.py             71     22    69%
+app/api/__init__.py          3      0   100%
+app/api/auth.py             21      0   100%
+app/api/errors.py           13      0   100%
+app/api/tokens.py           15      0   100%
+app/api/users.py            59      7    88%
+app/auth/__init__.py         3      0   100%
+app/auth/email.py            6      0   100%
+app/auth/forms.py           33      2    94%
+app/auth/routes.py          69      7    90%
+app/cli.py                  26     13    50%
+app/email.py                17      3    82%
+app/errors/__init__.py       3      0   100%
+app/errors/handlers.py      17      5    71%
+app/main/__init__.py         3      0   100%
+app/main/forms.py           36      0   100%
+app/main/routes.py         167     50    70%
+app/models.py              207     31    85%
+app/search.py               18     12    33%
+app/tasks.py                38     38     0%
+app/translate.py            11      7    36%
+--------------------------------------------
+TOTAL                      836    197    76%
+Coverage HTML written to dir qa/evidencias/cobertura_html
+Coverage XML written to file qa/evidencias/coverage.xml
+=========================== short test summary info ============================
+FAILED qa/test_integration_api.py::test_IT14_crear_usuario_email_invalido_deberia_400
+FAILED qa/test_integration_api.py::test_IT15_crear_usuario_username_vacio_deberia_400
+FAILED qa/test_integration_api.py::test_IT16_crear_usuario_cuerpo_json_null_no_debe_dar_500
+FAILED qa/test_integration_api.py::test_IT18_actualizar_con_about_me_mayor_140_deberia_400
+FAILED qa/test_integration_api.py::test_IT19_actualizar_username_vacio_deberia_400
+FAILED qa/test_security.py::test_SEC09_secret_key_por_defecto_no_deberia_usarse
+FAILED qa/test_security.py::test_SEC10_token_de_reset_falsificable_con_clave_por_defecto
+FAILED qa/test_security.py::test_SEC11_fuerza_bruta_api_sin_bloqueo - Asserti...
+FAILED qa/test_security.py::test_SEC12_politica_de_contrasena_minima - Assert...
+FAILED qa/test_security.py::test_SEC13_cabeceras_de_seguridad_http - Assertio...
+================== 10 failed, 58 passed, 7 warnings in 22.56s ==================

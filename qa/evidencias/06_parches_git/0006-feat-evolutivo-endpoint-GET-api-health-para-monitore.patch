@@ -1,0 +1,44 @@
+From ff3b794c7a4341ce174dc2535216f2bd5d17743b Mon Sep 17 00:00:00 2001
+From: Equipo QA <qa@example.com>
+Date: Thu, 22 Oct 2026 00:51:07 +0000
+Subject: [PATCH 06/10] feat(evolutivo): endpoint GET /api/health para
+ monitoreo (EV-01)
+
+---
+ app/api/__init__.py |  2 +-
+ app/api/health.py   | 13 +++++++++++++
+ 2 files changed, 14 insertions(+), 1 deletion(-)
+ create mode 100644 app/api/health.py
+
+diff --git a/app/api/__init__.py b/app/api/__init__.py
+index 61b2e60..2ae6a9a 100644
+--- a/app/api/__init__.py
++++ b/app/api/__init__.py
+@@ -2,4 +2,4 @@ from flask import Blueprint
+ 
+ bp = Blueprint('api', __name__)
+ 
+-from app.api import users, errors, tokens
++from app.api import users, errors, tokens, health
+diff --git a/app/api/health.py b/app/api/health.py
+new file mode 100644
+index 0000000..b7a6812
+--- /dev/null
++++ b/app/api/health.py
+@@ -0,0 +1,13 @@
++import sqlalchemy as sa
++from app import db
++from app.api import bp
++
++
++@bp.route('/health', methods=['GET'])
++def health():
++    """Verificacion de salud para monitoreo / balanceadores (EV-01)."""
++    try:
++        db.session.execute(sa.text('SELECT 1'))
++        return {'status': 'ok', 'database': 'ok'}
++    except Exception:
++        return {'status': 'degraded', 'database': 'error'}, 503
+-- 
+2.43.0
+

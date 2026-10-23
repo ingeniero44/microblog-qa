@@ -1,0 +1,116 @@
+============================= test session starts ==============================
+collecting ... collected 74 items
+
+tests.py::UserModelCase::test_avatar PASSED                              [  1%]
+tests.py::UserModelCase::test_follow PASSED                              [  2%]
+tests.py::UserModelCase::test_follow_posts PASSED                        [  4%]
+tests.py::UserModelCase::test_password_hashing PASSED                    [  5%]
+qa/test_integration_api.py::test_IT01_crear_usuario_201 PASSED           [  6%]
+qa/test_integration_api.py::test_IT02_crear_usuario_campos_faltantes_400 PASSED [  8%]
+qa/test_integration_api.py::test_IT03_crear_usuario_duplicado_400 PASSED [  9%]
+qa/test_integration_api.py::test_IT04_token_con_credenciales_validas PASSED [ 10%]
+qa/test_integration_api.py::test_IT05_token_con_credenciales_invalidas_401 PASSED [ 12%]
+qa/test_integration_api.py::test_IT06_listar_usuarios_sin_token_401 PASSED [ 13%]
+qa/test_integration_api.py::test_IT07_listar_usuarios_con_token_200 PASSED [ 14%]
+qa/test_integration_api.py::test_IT08_per_page_limitado_a_100 PASSED     [ 16%]
+qa/test_integration_api.py::test_IT09_obtener_usuario_inexistente_404 PASSED [ 17%]
+qa/test_integration_api.py::test_IT10_actualizar_otro_usuario_403 PASSED [ 18%]
+qa/test_integration_api.py::test_IT11_actualizar_propio_perfil_200 PASSED [ 20%]
+qa/test_integration_api.py::test_IT12_revocar_token_y_reusar_401 PASSED  [ 21%]
+qa/test_integration_api.py::test_IT13_seguidores_paginados PASSED        [ 22%]
+qa/test_integration_api.py::test_IT14_crear_usuario_email_invalido_deberia_400 PASSED [ 24%]
+qa/test_integration_api.py::test_IT15_crear_usuario_username_vacio_deberia_400 PASSED [ 25%]
+qa/test_integration_api.py::test_IT16_crear_usuario_cuerpo_json_null_no_debe_dar_500 PASSED [ 27%]
+qa/test_integration_api.py::test_IT17_crear_usuario_cuerpo_lista_no_debe_dar_500 PASSED [ 28%]
+qa/test_integration_api.py::test_IT18_actualizar_con_about_me_mayor_140_deberia_400 PASSED [ 29%]
+qa/test_integration_api.py::test_IT19_actualizar_username_vacio_deberia_400 PASSED [ 31%]
+qa/test_integration_api.py::test_IT20_health_check_publico_y_con_bd PASSED [ 32%]
+qa/test_security.py::test_SEC01_inyeccion_sql_en_login_no_autentica PASSED [ 33%]
+qa/test_security.py::test_SEC02_inyeccion_sql_en_url_de_usuario PASSED   [ 35%]
+qa/test_security.py::test_SEC03_xss_en_about_me_escapado PASSED          [ 36%]
+qa/test_security.py::test_SEC04_contrasenas_con_hash_salado PASSED       [ 37%]
+qa/test_security.py::test_SEC05_rutas_privadas_requieren_sesion PASSED   [ 39%]
+qa/test_security.py::test_SEC06_csrf_activo_por_defecto PASSED           [ 40%]
+qa/test_security.py::test_SEC07_open_redirect_con_next_netloc_bloqueado PASSED [ 41%]
+qa/test_security.py::test_SEC08_open_redirect_con_barra_invertida PASSED [ 43%]
+qa/test_security.py::test_SEC09_secret_key_por_defecto_no_deberia_usarse PASSED [ 44%]
+qa/test_security.py::test_SEC10_token_de_reset_falsificable_con_clave_por_defecto PASSED [ 45%]
+qa/test_security.py::test_SEC11_fuerza_bruta_api_sin_bloqueo PASSED      [ 47%]
+qa/test_security.py::test_SEC12_politica_de_contrasena_minima PASSED     [ 48%]
+qa/test_security.py::test_SEC13_cabeceras_de_seguridad_http PASSED       [ 50%]
+qa/test_security.py::test_SEC14_enumeracion_de_usuarios_en_reset PASSED  [ 51%]
+qa/test_system_acceptance.py::test_ST01_flujo_registro_login_publicar PASSED [ 52%]
+qa/test_system_acceptance.py::test_ST02_pagina_privada_redirige_a_login PASSED [ 54%]
+qa/test_system_acceptance.py::test_ST03_login_invalido_muestra_error PASSED [ 55%]
+qa/test_system_acceptance.py::test_ST04_registro_passwords_distintas_rechazado PASSED [ 56%]
+qa/test_system_acceptance.py::test_ST05_registro_email_invalido_rechazado PASSED [ 58%]
+qa/test_system_acceptance.py::test_ST06_post_vacio_rechazado PASSED      [ 59%]
+qa/test_system_acceptance.py::test_ST07_post_mayor_140_rechazado PASSED  [ 60%]
+qa/test_system_acceptance.py::test_ST08_seguir_y_dejar_de_seguir PASSED  [ 62%]
+qa/test_system_acceptance.py::test_ST09_no_puede_seguirse_a_si_mismo PASSED [ 63%]
+qa/test_system_acceptance.py::test_ST10_editar_perfil PASSED             [ 64%]
+qa/test_system_acceptance.py::test_ST11_nombre_usuario_duplicado_en_edicion PASSED [ 66%]
+qa/test_system_acceptance.py::test_ST12_explorar_muestra_posts_de_todos PASSED [ 67%]
+qa/test_system_acceptance.py::test_ST13_logout_cierra_sesion PASSED      [ 68%]
+qa/test_system_acceptance.py::test_ST14_usuario_inexistente_404 PASSED   [ 70%]
+qa/test_system_acceptance.py::test_ST15_xss_en_post_es_escapado PASSED   [ 71%]
+qa/test_system_acceptance.py::test_AT01_un_usuario_nuevo_puede_registrarse_e_ingresar PASSED [ 72%]
+qa/test_system_acceptance.py::test_AT02_el_inicio_muestra_solo_posts_propios_y_de_seguidos PASSED [ 74%]
+qa/test_system_acceptance.py::test_AT03_la_paginacion_limita_a_25_posts PASSED [ 75%]
+qa/test_system_acceptance.py::test_AT04_el_idioma_es_se_aplica_con_accept_language PASSED [ 77%]
+qa/test_unit.py::test_UT01_password_hash_no_es_texto_plano PASSED        [ 78%]
+qa/test_unit.py::test_UT02_password_incorrecta_rechazada PASSED          [ 79%]
+qa/test_unit.py::test_UT03_avatar_usa_email_en_minusculas PASSED         [ 81%]
+qa/test_unit.py::test_UT04_avatar_incluye_tamano PASSED                  [ 82%]
+qa/test_unit.py::test_UT05_follow_y_unfollow PASSED                      [ 83%]
+qa/test_unit.py::test_UT06_follow_duplicado_no_duplica PASSED            [ 85%]
+qa/test_unit.py::test_UT07_following_posts_orden_y_contenido PASSED      [ 86%]
+qa/test_unit.py::test_UT08_token_reset_valido PASSED                     [ 87%]
+qa/test_unit.py::test_UT09_token_reset_expirado PASSED                   [ 89%]
+qa/test_unit.py::test_UT10_token_reset_manipulado PASSED                 [ 90%]
+qa/test_unit.py::test_UT11_token_api_se_reutiliza_si_vigente PASSED      [ 91%]
+qa/test_unit.py::test_UT12_revocar_token_invalida_acceso PASSED          [ 93%]
+qa/test_unit.py::test_UT13_to_dict_no_expone_email_por_defecto PASSED    [ 94%]
+qa/test_unit.py::test_UT14_post_longitud_limite_modelo[0-True] PASSED    [ 95%]
+qa/test_unit.py::test_UT14_post_longitud_limite_modelo[139-True] PASSED  [ 97%]
+qa/test_unit.py::test_UT14_post_longitud_limite_modelo[140-True] PASSED  [ 98%]
+qa/test_unit.py::test_UT15_cli_rechaza_codigo_de_idioma_malicioso PASSED [100%]
+
+=============================== warnings summary ===============================
+qa/test_security.py::test_SEC10_token_de_reset_falsificable_con_clave_por_defecto
+  /home/claude/venv/lib/python3.12/site-packages/jwt/api_jwt.py:149: InsecureKeyLengthWarning: The HMAC key is 20 bytes long, which is below the minimum recommended length of 32 bytes for SHA256. See RFC 7518 Section 3.2.
+    return self._jws.encode(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+- generated xml file: /home/claude/microblog/qa/evidencias/02_despues/junit.xml -
+================================ tests coverage ================================
+_______________ coverage: platform linux, python 3.12.3-final-0 ________________
+
+Name                     Stmts   Miss  Cover
+--------------------------------------------
+app/__init__.py             78     22    72%
+app/api/__init__.py          3      0   100%
+app/api/auth.py             38      0   100%
+app/api/errors.py           13      0   100%
+app/api/health.py           10      2    80%
+app/api/tokens.py           15      0   100%
+app/api/users.py            90      9    90%
+app/auth/__init__.py         3      0   100%
+app/auth/email.py            6      0   100%
+app/auth/forms.py           33      2    94%
+app/auth/routes.py          69     12    83%
+app/cli.py                  30     12    60%
+app/email.py                17      3    82%
+app/errors/__init__.py       3      0   100%
+app/errors/handlers.py      17      5    71%
+app/main/__init__.py         3      0   100%
+app/main/forms.py           36      0   100%
+app/main/routes.py         167     50    70%
+app/models.py              207     32    85%
+app/search.py               18     12    33%
+app/tasks.py                38     38     0%
+app/translate.py            11      7    36%
+--------------------------------------------
+TOTAL                      905    206    77%
+Coverage HTML written to dir qa/evidencias/02_despues/cobertura_html
+======================== 74 passed, 1 warning in 16.95s ========================

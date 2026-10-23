@@ -1,0 +1,38 @@
+From b51a0ac5ab7e2d212019a933407c5a8f1bceaa93 Mon Sep 17 00:00:00 2001
+From: Equipo QA <qa@example.com>
+Date: Thu, 22 Oct 2026 00:51:07 +0000
+Subject: [PATCH 04/10] fix(security): cabeceras HTTP de seguridad
+ X-Content-Type-Options, X-Frame-Options, CSP (BUG-09)
+
+---
+ app/__init__.py | 14 ++++++++++++++
+ 1 file changed, 14 insertions(+)
+
+diff --git a/app/__init__.py b/app/__init__.py
+index afcb6a5..b65f20a 100644
+--- a/app/__init__.py
++++ b/app/__init__.py
+@@ -43,6 +43,20 @@ def create_app(config_class=Config):
+     app.redis = Redis.from_url(app.config['REDIS_URL'])
+     app.task_queue = rq.Queue('microblog-tasks', connection=app.redis)
+ 
++    @app.after_request
++    def add_security_headers(response):
++        response.headers.setdefault('X-Content-Type-Options', 'nosniff')
++        response.headers.setdefault('X-Frame-Options', 'DENY')
++        response.headers.setdefault('Referrer-Policy', 'strict-origin-when-cross-origin')
++        response.headers.setdefault(
++            'Content-Security-Policy',
++            "default-src 'self'; "
++            "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; "
++            "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; "
++            "img-src 'self' data: https://www.gravatar.com; "
++            "frame-ancestors 'none'")
++        return response
++
+     from app.errors import bp as errors_bp
+     app.register_blueprint(errors_bp)
+ 
+-- 
+2.43.0
+

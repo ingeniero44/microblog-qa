@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="10" skipped="0" tests="68" time="22.561" timestamp="2026-10-22T00:48:09.092907+00:00" hostname="vm"><testcase classname="qa.test_integration_api" name="test_IT01_crear_usuario_201" time="0.267" /><testcase classname="qa.test_integration_api" name="test_IT02_crear_usuario_campos_faltantes_400" time="0.036" /><testcase classname="qa.test_integration_api" name="test_IT03_crear_usuario_duplicado_400" time="0.160" /><testcase classname="qa.test_integration_api" name="test_IT04_token_con_credenciales_validas" time="0.231" /><testcase classname="qa.test_integration_api" name="test_IT05_token_con_credenciales_invalidas_401" time="0.233" /><testcase classname="qa.test_integration_api" name="test_IT06_listar_usuarios_sin_token_401" time="0.033" /><testcase classname="qa.test_integration_api" name="test_IT07_listar_usuarios_con_token_200" time="0.253" /><testcase classname="qa.test_integration_api" name="test_IT08_per_page_limitado_a_100" time="0.244" /><testcase classname="qa.test_integration_api" name="test_IT09_obtener_usuario_inexistente_404" time="0.240" /><testcase classname="qa.test_integration_api" name="test_IT10_actualizar_otro_usuario_403" time="0.342" /><testcase classname="qa.test_integration_api" name="test_IT11_actualizar_propio_perfil_200" time="0.361" /><testcase classname="qa.test_integration_api" name="test_IT12_revocar_token_y_reusar_401" time="0.234" /><testcase classname="qa.test_integration_api" name="test_IT13_seguidores_paginados" time="0.343" /><testcase classname="qa.test_integration_api" name="test_IT14_crear_usuario_email_invalido_deberia_400" time="0.148"><failure message="AssertionError: API acepto un email invalido (status 201)&#10;assert 201 == 400&#10; +  where 201 = &lt;WrapperTestResponse streamed [201 CREATED]&gt;.status_code">client = &lt;FlaskClient &lt;Flask 'app'&gt;&gt;
+
+    def test_IT14_crear_usuario_email_invalido_deberia_400(client):
+        r = client.post('/api/users', json={'username': 'x', 'email': 'esto-no-es-correo', 'password': 'abc'})
+&gt;       assert r.status_code == 400, f'API acepto un email invalido (status {r.status_code})'
+E       AssertionError: API acepto un email invalido (status 201)
+E       assert 201 == 400
+E        +  where 201 = &lt;WrapperTestResponse streamed [201 CREATED]&gt;.status_code
+
+qa/test_integration_api.py:93: AssertionError</failure></testcase><testcase classname="qa.test_integration_api" name="test_IT15_crear_usuario_username_vacio_deberia_400" time="0.142"><failure message="AssertionError: API acepto username vacio (status 201)&#10;assert 201 == 400&#10; +  where 201 = &lt;WrapperTestResponse streamed [201 CREATED]&gt;.status_code">client = &lt;FlaskClient &lt;Flask 'app'&gt;&gt;
+
+    def test_IT15_crear_usuario_username_vacio_deberia_400(client):
+        r = client.post('/api/users', json={'username': '', 'email': 'v@e.com', 'password': 'abc'})
+&gt;       assert r.status_code == 400, f'API acepto username vacio (status {r.status_code})'
+E       AssertionError: API acepto username vacio (status 201)
+E       assert 201 == 400
+E        +  where 201 = &lt;WrapperTestResponse streamed [201 CREATED]&gt;.status_code
+
+qa/test_integration_api.py:98: AssertionError</failure></testcase><testcase classname="qa.test_integration_api" name="test_IT16_crear_usuario_cuerpo_json_null_no_debe_dar_500" time="0.034"><failure message="TypeError: argument of type 'NoneType' is not iterable">client = &lt;FlaskClient &lt;Flask 'app'&gt;&gt;
+
+    def test_IT16_crear_usuario_cuerpo_json_null_no_debe_dar_500(client):
+&gt;       r = client.post('/api/users', data='null', content_type='application/json')
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+qa/test_integration_api.py:102: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../venv/lib/python3.12/site-packages/werkzeug/test.py:1171: in post
+    return self.open(*args, **kw)
+           ^^^^^^^^^^^^^^^^^^^^^^
+../venv/lib/python3.12/site-packages/flask/testing.py:232: in open
+    response = super().open(
+../venv/lib/python3.12/site-packages/werkzeug/test.py:1120: in open
+    response_parts = self.run_wsgi_app(request.environ, buffered=buffered)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../venv/lib/python3.12/site-packages/werkzeug/test.py:992: in run_wsgi_app
+    rv = run_wsgi_app(self.application, environ, buffered=buffered)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../venv/lib/python3.12/site-packages/werkzeug/test.py:1268: in run_wsgi_app
+    app_rv = app(environ, start_response)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../venv/lib/python3.12/site-packages/flask/app.py:1478: in __call__
+    return self.wsgi_app(environ, start_response)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../venv/lib/python3.12/site-packages/flask/app.py:1458: in wsgi_app
+    response = self.handle_exception(e)
+               ^^^^^^^^^^^^^^^^^^^^^^^^
+../venv/lib/python3.12/site-packages/flask/app.py:1455: in wsgi_app
+    response = self.full_dispatch_request()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../venv/lib/python3.12/site-packages/flask/app.py:869: in full_dispatch_request
+    rv = self.handle_user_exception(e)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../venv/lib/python3.12/site-packages/flask/app.py:867: in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+../venv/lib/python3.12/site-packages/flask/app.py:852: in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    @bp.route('/users', methods=['POST'])
+    def create_user():
+        data = request.get_json()
+&gt;       if 'username' not in data or 'email' not in data or 'password' not in data:
+           ^^^^^^^^^^^^^^^^^^^^^^
+E       TypeError: argument of type 'NoneType' is not iterable
+
+app/api/users.py:48: TypeError</failure></testcase><testcase classname="qa.test_integration_api" name="test_IT17_crear_usuario_cuerpo_lista_no_debe_dar_500" time="0.031" /><testcase classname="qa.test_integration_api" name="test_IT18_actualizar_con_about_me_mayor_140_deberia_400" time="0.286"><failure message="AssertionError: API acepto about_me de 500 caracteres (status 200)&#10;assert 200 == 400&#10; +  where 200 = &lt;WrapperTestResponse streamed [200 OK]&gt;.status_code">client = &lt;FlaskClient &lt;Flask 'app'&gt;&gt;
+make_user = &lt;function make_user.&lt;locals&gt;._make at 0x7f14ff1749a0&gt;
+api_token = &lt;function api_token.&lt;locals&gt;._tok at 0x7f14ff174b80&gt;
+
+    def test_IT18_actualizar_con_about_me_mayor_140_deberia_400(client, make_user, api_token):
+        make_user(); t = api_token()
+        r = client.put('/api/users/1', json={'about_me': 'x' * 500}, headers=bearer(t))
+&gt;       assert r.status_code == 400, f'API acepto about_me de 500 caracteres (status {r.status_code})'
+E       AssertionError: API acepto about_me de 500 caracteres (status 200)
+E       assert 200 == 400
+E        +  where 200 = &lt;WrapperTestResponse streamed [200 OK]&gt;.status_code
+
+qa/test_integration_api.py:114: AssertionError</failure></testcase><testcase classname="qa.test_integration_api" name="test_IT19_actualizar_username_vacio_deberia_400" time="0.268"><failure message="AssertionError: API acepto username vacio en PUT (status 200)&#10;assert 200 == 400&#10; +  where 200 = &lt;WrapperTestResponse streamed [200 OK]&gt;.status_code">client = &lt;FlaskClient &lt;Flask 'app'&gt;&gt;
+make_user = &lt;function make_user.&lt;locals&gt;._make at 0x7f14ff23f2e0&gt;
+api_token = &lt;function api_token.&lt;locals&gt;._tok at 0x7f14ff1d0a40&gt;
+
+    def test_IT19_actualizar_username_vacio_deberia_400(client, make_user, api_token):
+        make_user(); t = api_token()
+        r = client.put('/api/users/1', json={'username': ''}, headers=bearer(t))
+&gt;       assert r.status_code == 400, f'API acepto username vacio en PUT (status {r.status_code})'
+E       AssertionError: API acepto username vacio en PUT (status 200)
+E       assert 200 == 400
+E        +  where 200 = &lt;WrapperTestResponse streamed [200 OK]&gt;.status_code
+
+qa/test_integration_api.py:120: AssertionError</failure></testcase><testcase classname="qa.test_security" name="test_SEC01_inyeccion_sql_en_login_no_autentica" time="0.133" /><testcase classname="qa.test_security" name="test_SEC02_inyeccion_sql_en_url_de_usuario" time="0.229" /><testcase classname="qa.test_security" name="test_SEC03_xss_en_about_me_escapado" time="0.312" /><testcase classname="qa.test_security" name="test_SEC04_contrasenas_con_hash_salado" time="0.232" /><testcase classname="qa.test_security" name="test_SEC05_rutas_privadas_requieren_sesion" time="0.046" /><testcase classname="qa.test_security" name="test_SEC06_csrf_activo_por_defecto" time="0.187" /><testcase classname="qa.test_security" name="test_SEC07_open_redirect_con_next_netloc_bloqueado" time="0.234" /><testcase classname="qa.test_security" name="test_SEC08_open_redirect_con_barra_invertida" time="0.233" /><testcase classname="qa.test_security" name="test_SEC09_secret_key_por_defecto_no_deberia_usarse" time="0.001"><failure message="AssertionError: SECRET_KEY por defecto publica en el repositorio&#10;assert 'you-will-never-guess' != 'you-will-never-guess'&#10; +  where 'you-will-never-guess' = &lt;class 'config.Config'&gt;.SECRET_KEY">def test_SEC09_secret_key_por_defecto_no_deberia_usarse():
+        from config import Config
+&gt;       assert Config.SECRET_KEY != 'you-will-never-guess', 'SECRET_KEY por defecto publica en el repositorio'
+E       AssertionError: SECRET_KEY por defecto publica en el repositorio
+E       assert 'you-will-never-guess' != 'you-will-never-guess'
+E        +  where 'you-will-never-guess' = &lt;class 'config.Config'&gt;.SECRET_KEY
+
+qa/test_security.py:72: AssertionError</failure></testcase><testcase classname="qa.test_security" name="test_SEC10_token_de_reset_falsificable_con_clave_por_defecto" time="0.337"><failure message="AssertionError: Se pudo restablecer la contrasena con un token falsificado&#10;assert not True&#10; +  where True = check_password('hack')&#10; +    where check_password = &lt;User ana&gt;.check_password&#10; +      where &lt;User ana&gt; = get(User, 1)&#10; +        where get = &lt;sqlalchemy.orm.scoping.scoped_session object at 0x7f14ffae89b0&gt;.get&#10; +          where &lt;sqlalchemy.orm.scoping.scoped_session object at 0x7f14ffae89b0&gt; = &lt;SQLAlchemy sqlite://&gt;.session&#10; +        and   1 = &lt;User ana&gt;.id">client = &lt;FlaskClient &lt;Flask 'app'&gt;&gt;
+make_user = &lt;function make_user.&lt;locals&gt;._make at 0x7f14feea1b20&gt;
+
+    def test_SEC10_token_de_reset_falsificable_con_clave_por_defecto(client, make_user):
+        u = make_user()
+        from config import Config
+        forged = jwt.encode({'reset_password': u.id, 'exp': time.time() + 600}, 'you-will-never-guess', algorithm='HS256')
+        r = client.post(f'/auth/reset_password/{forged}', data={'password': 'hack', 'password2': 'hack'})
+        db.session.expire_all()
+&gt;       assert not db.session.get(User, u.id).check_password('hack'), 'Se pudo restablecer la contrasena con un token falsificado'
+E       AssertionError: Se pudo restablecer la contrasena con un token falsificado
+E       assert not True
+E        +  where True = check_password('hack')
+E        +    where check_password = &lt;User ana&gt;.check_password
+E        +      where &lt;User ana&gt; = get(User, 1)
+E        +        where get = &lt;sqlalchemy.orm.scoping.scoped_session object at 0x7f14ffae89b0&gt;.get
+E        +          where &lt;sqlalchemy.orm.scoping.scoped_session object at 0x7f14ffae89b0&gt; = &lt;SQLAlchemy sqlite://&gt;.session
+E        +        and   1 = &lt;User ana&gt;.id
+
+qa/test_security.py:81: AssertionError</failure></testcase><testcase classname="qa.test_security" name="test_SEC11_fuerza_bruta_api_sin_bloqueo" time="5.408"><failure message="AssertionError: Sin limite de intentos: 50 intentos fallidos seguidos sin bloqueo (no hay 429)&#10;assert 429 in [401, 401, 401, 401, 401, 401, ...]">client = &lt;FlaskClient &lt;Flask 'app'&gt;&gt;
+make_user = &lt;function make_user.&lt;locals&gt;._make at 0x7f14feeda980&gt;
+
+    def test_SEC11_fuerza_bruta_api_sin_bloqueo(client, make_user):
+        make_user()
+        cred = lambda p: {'Authorization': 'Basic ' + base64.b64encode(f'ana:{p}'.encode()).decode()}
+        codes = [client.post('/api/tokens', headers=cred(f'intento{i}')).status_code for i in range(50)]
+&gt;       assert 429 in codes, 'Sin limite de intentos: 50 intentos fallidos seguidos sin bloqueo (no hay 429)'
+E       AssertionError: Sin limite de intentos: 50 intentos fallidos seguidos sin bloqueo (no hay 429)
+E       assert 429 in [401, 401, 401, 401, 401, 401, ...]
+
+qa/test_security.py:88: AssertionError</failure></testcase><testcase classname="qa.test_security" name="test_SEC12_politica_de_contrasena_minima" time="0.150"><failure message="AssertionError: La API acepta contrasenas de 1 caracter&#10;assert 201 == 400&#10; +  where 201 = &lt;WrapperTestResponse streamed [201 CREATED]&gt;.status_code">client = &lt;FlaskClient &lt;Flask 'app'&gt;&gt;
+
+    def test_SEC12_politica_de_contrasena_minima(client):
+        r = client.post('/api/users', json={'username': 'u', 'email': 'u@e.com', 'password': '1'})
+&gt;       assert r.status_code == 400, 'La API acepta contrasenas de 1 caracter'
+E       AssertionError: La API acepta contrasenas de 1 caracter
+E       assert 201 == 400
+E        +  where 201 = &lt;WrapperTestResponse streamed [201 CREATED]&gt;.status_code
+
+qa/test_security.py:93: AssertionError</failure></testcase><testcase classname="qa.test_security" name="test_SEC13_cabeceras_de_seguridad_http" time="0.324"><failure message="AssertionError: Cabeceras ausentes: ['X-Content-Type-Options', 'X-Frame-Options', 'Content-Security-Policy']&#10;assert not ['X-Content-Type-Options', 'X-Frame-Options', 'Content-Security-Policy']">client = &lt;FlaskClient &lt;Flask 'app'&gt;&gt;
+make_user = &lt;function make_user.&lt;locals&gt;._make at 0x7f14ff00f560&gt;
+login = &lt;function login.&lt;locals&gt;._login at 0x7f14ff00f740&gt;
+
+    def test_SEC13_cabeceras_de_seguridad_http(client, make_user, login):
+        make_user(); login()
+        h = client.get('/index').headers
+        faltan = [x for x in ['X-Content-Type-Options', 'X-Frame-Options', 'Content-Security-Policy'] if x not in h]
+&gt;       assert not faltan, f'Cabeceras ausentes: {faltan}'
+E       AssertionError: Cabeceras ausentes: ['X-Content-Type-Options', 'X-Frame-Options', 'Content-Security-Policy']
+E       assert not ['X-Content-Type-Options', 'X-Frame-Options', 'Content-Security-Policy']
+
+qa/test_security.py:100: AssertionError</failure></testcase><testcase classname="qa.test_security" name="test_SEC14_enumeracion_de_usuarios_en_reset" time="0.305" /><testcase classname="qa.test_system_acceptance" name="test_ST01_flujo_registro_login_publicar" time="0.849" /><testcase classname="qa.test_system_acceptance" name="test_ST02_pagina_privada_redirige_a_login" time="0.038" /><testcase classname="qa.test_system_acceptance" name="test_ST03_login_invalido_muestra_error" time="0.283" /><testcase classname="qa.test_system_acceptance" name="test_ST04_registro_passwords_distintas_rechazado" time="0.092" /><testcase classname="qa.test_system_acceptance" name="test_ST05_registro_email_invalido_rechazado" time="0.088" /><testcase classname="qa.test_system_acceptance" name="test_ST06_post_vacio_rechazado" time="0.329" /><testcase classname="qa.test_system_acceptance" name="test_ST07_post_mayor_140_rechazado" time="0.369" /><testcase classname="qa.test_system_acceptance" name="test_ST08_seguir_y_dejar_de_seguir" time="0.450" /><testcase classname="qa.test_system_acceptance" name="test_ST09_no_puede_seguirse_a_si_mismo" time="0.302" /><testcase classname="qa.test_system_acceptance" name="test_ST10_editar_perfil" time="0.304" /><testcase classname="qa.test_system_acceptance" name="test_ST11_nombre_usuario_duplicado_en_edicion" time="0.413" /><testcase classname="qa.test_system_acceptance" name="test_ST12_explorar_muestra_posts_de_todos" time="0.566" /><testcase classname="qa.test_system_acceptance" name="test_ST13_logout_cierra_sesion" time="0.247" /><testcase classname="qa.test_system_acceptance" name="test_ST14_usuario_inexistente_404" time="0.272" /><testcase classname="qa.test_system_acceptance" name="test_ST15_xss_en_post_es_escapado" time="0.369" /><testcase classname="qa.test_system_acceptance" name="test_AT01_un_usuario_nuevo_puede_registrarse_e_ingresar" time="0.329" /><testcase classname="qa.test_system_acceptance" name="test_AT02_el_inicio_muestra_solo_posts_propios_y_de_seguidos" time="0.627" /><testcase classname="qa.test_system_acceptance" name="test_AT03_la_paginacion_limita_a_25_posts" time="0.364" /><testcase classname="qa.test_system_acceptance" name="test_AT04_el_idioma_es_se_aplica_con_accept_language" time="0.353" /><testcase classname="qa.test_unit" name="test_UT01_password_hash_no_es_texto_plano" time="0.267" /><testcase classname="qa.test_unit" name="test_UT02_password_incorrecta_rechazada" time="0.222" /><testcase classname="qa.test_unit" name="test_UT03_avatar_usa_email_en_minusculas" time="0.030" /><testcase classname="qa.test_unit" name="test_UT04_avatar_incluye_tamano" time="0.032" /><testcase classname="qa.test_unit" name="test_UT05_follow_y_unfollow" time="0.252" /><testcase classname="qa.test_unit" name="test_UT06_follow_duplicado_no_duplica" time="0.250" /><testcase classname="qa.test_unit" name="test_UT07_following_posts_orden_y_contenido" time="0.355" /><testcase classname="qa.test_unit" name="test_UT08_token_reset_valido" time="0.134" /><testcase classname="qa.test_unit" name="test_UT09_token_reset_expirado" time="0.145" /><testcase classname="qa.test_unit" name="test_UT10_token_reset_manipulado" time="0.169" /><testcase classname="qa.test_unit" name="test_UT11_token_api_se_reutiliza_si_vigente" time="0.144" /><testcase classname="qa.test_unit" name="test_UT12_revocar_token_invalida_acceso" time="0.148" /><testcase classname="qa.test_unit" name="test_UT13_to_dict_no_expone_email_por_defecto" time="0.145" /><testcase classname="qa.test_unit" name="test_UT14_post_longitud_limite_modelo[0-True]" time="0.168" /><testcase classname="qa.test_unit" name="test_UT14_post_longitud_limite_modelo[139-True]" time="0.163" /><testcase classname="qa.test_unit" name="test_UT14_post_longitud_limite_modelo[140-True]" time="0.181" /></testsuite></testsuites>

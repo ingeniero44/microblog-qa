@@ -1,0 +1,245 @@
+diff --git a/app/__init__.py b/app/__init__.py
+index afcb6a5..b65f20a 100644
+--- a/app/__init__.py
++++ b/app/__init__.py
+@@ -43,6 +43,20 @@ def create_app(config_class=Config):
+     app.redis = Redis.from_url(app.config['REDIS_URL'])
+     app.task_queue = rq.Queue('microblog-tasks', connection=app.redis)
+ 
++    @app.after_request
++    def add_security_headers(response):
++        response.headers.setdefault('X-Content-Type-Options', 'nosniff')
++        response.headers.setdefault('X-Frame-Options', 'DENY')
++        response.headers.setdefault('Referrer-Policy', 'strict-origin-when-cross-origin')
++        response.headers.setdefault(
++            'Content-Security-Policy',
++            "default-src 'self'; "
++            "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; "
++            "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; "
++            "img-src 'self' data: https://www.gravatar.com; "
++            "frame-ancestors 'none'")
++        return response
++
+     from app.errors import bp as errors_bp
+     app.register_blueprint(errors_bp)
+ 
+diff --git a/app/api/__init__.py b/app/api/__init__.py
+index 61b2e60..2ae6a9a 100644
+--- a/app/api/__init__.py
++++ b/app/api/__init__.py
+@@ -2,4 +2,4 @@ from flask import Blueprint
+ 
+ bp = Blueprint('api', __name__)
+ 
+-from app.api import users, errors, tokens
++from app.api import users, errors, tokens, health
+diff --git a/app/api/auth.py b/app/api/auth.py
+index 82ab263..4a89970 100644
+--- a/app/api/auth.py
++++ b/app/api/auth.py
+@@ -1,4 +1,6 @@
++import time
+ import sqlalchemy as sa
++from flask import g, request, current_app
+ from flask_httpauth import HTTPBasicAuth, HTTPTokenAuth
+ from app import db
+ from app.models import User
+@@ -8,15 +10,34 @@ basic_auth = HTTPBasicAuth()
+ token_auth = HTTPTokenAuth()
+ 
+ 
++MAX_FAILED_ATTEMPTS = 5
++LOCK_WINDOW_SECONDS = 60
++
++
++def _attempts(key):
++    store = current_app.__dict__.setdefault('_login_failures', {})
++    now = time.time()
++    store[key] = [t for t in store.get(key, []) if now - t < LOCK_WINDOW_SECONDS]
++    return store[key]
++
++
+ @basic_auth.verify_password
+ def verify_password(username, password):
++    key = (request.remote_addr, username)
++    if len(_attempts(key)) >= MAX_FAILED_ATTEMPTS:
++        g.rate_limited = True
++        return None
+     user = db.session.scalar(sa.select(User).where(User.username == username))
+     if user and user.check_password(password):
++        _attempts(key).clear()
+         return user
++    _attempts(key).append(time.time())
+ 
+ 
+ @basic_auth.error_handler
+ def basic_auth_error(status):
++    if g.get('rate_limited'):
++        return error_response(429, 'too many failed attempts, try again later')
+     return error_response(status)
+ 
+ 
+diff --git a/app/api/health.py b/app/api/health.py
+new file mode 100644
+index 0000000..b7a6812
+--- /dev/null
++++ b/app/api/health.py
+@@ -0,0 +1,13 @@
++import sqlalchemy as sa
++from app import db
++from app.api import bp
++
++
++@bp.route('/health', methods=['GET'])
++def health():
++    """Verificacion de salud para monitoreo / balanceadores (EV-01)."""
++    try:
++        db.session.execute(sa.text('SELECT 1'))
++        return {'status': 'ok', 'database': 'ok'}
++    except Exception:
++        return {'status': 'degraded', 'database': 'error'}, 503
+diff --git a/app/api/users.py b/app/api/users.py
+index 8a0b59e..a45ef87 100644
+--- a/app/api/users.py
++++ b/app/api/users.py
+@@ -5,6 +5,35 @@ from app.models import User
+ from app.api import bp
+ from app.api.auth import token_auth
+ from app.api.errors import bad_request
++from email_validator import validate_email, EmailNotValidError
++
++MIN_PASSWORD_LENGTH = 8
++
++
++def validate_user_payload(data, partial=False):
++    """Devuelve un mensaje de error (str) o None si el cuerpo JSON es valido."""
++    if not isinstance(data, dict):
++        return 'request body must be a JSON object'
++    if 'username' in data:
++        u = data['username']
++        if not isinstance(u, str) or not u.strip() or len(u) > 64:
++            return 'username must be a non-empty string of at most 64 characters'
++    if 'email' in data:
++        e = data['email']
++        if not isinstance(e, str) or len(e) > 120:
++            return 'email must be a valid address of at most 120 characters'
++        try:
++            validate_email(e, check_deliverability=False)
++        except EmailNotValidError:
++            return 'email must be a valid address'
++    if 'about_me' in data and data['about_me'] is not None:
++        if not isinstance(data['about_me'], str) or len(data['about_me']) > 140:
++            return 'about_me must be a string of at most 140 characters'
++    if 'password' in data:
++        pw = data['password']
++        if not isinstance(pw, str) or len(pw) < MIN_PASSWORD_LENGTH:
++            return f'password must have at least {MIN_PASSWORD_LENGTH} characters'
++    return None
+ 
+ 
+ @bp.route('/users/<int:id>', methods=['GET'])
+@@ -45,6 +74,9 @@ def get_following(id):
+ @bp.route('/users', methods=['POST'])
+ def create_user():
+     data = request.get_json()
++    error = validate_user_payload(data)
++    if error:
++        return bad_request(error)
+     if 'username' not in data or 'email' not in data or 'password' not in data:
+         return bad_request('must include username, email and password fields')
+     if db.session.scalar(sa.select(User).where(
+@@ -68,6 +100,9 @@ def update_user(id):
+         abort(403)
+     user = db.get_or_404(User, id)
+     data = request.get_json()
++    error = validate_user_payload(data, partial=True)
++    if error:
++        return bad_request(error)
+     if 'username' in data and data['username'] != user.username and \
+         db.session.scalar(sa.select(User).where(
+             User.username == data['username'])):
+diff --git a/app/cli.py b/app/cli.py
+index 25e2a27..2ca83e3 100644
+--- a/app/cli.py
++++ b/app/cli.py
+@@ -1,4 +1,6 @@
+ import os
++import re
++import subprocess
+ from flask import Blueprint
+ import click
+ 
+@@ -15,10 +17,13 @@ def translate():
+ @click.argument('lang')
+ def init(lang):
+     """Initialize a new language."""
+-    if os.system('pybabel extract -F babel.cfg -k _l -o messages.pot .'):
++    if not re.fullmatch(r'[A-Za-z_]{2,10}', lang):
++        raise click.BadParameter('invalid language code')
++    if subprocess.run(['pybabel', 'extract', '-F', 'babel.cfg', '-k', '_l',
++                       '-o', 'messages.pot', '.']).returncode:
+         raise RuntimeError('extract command failed')
+-    if os.system(
+-            'pybabel init -i messages.pot -d app/translations -l ' + lang):
++    if subprocess.run(['pybabel', 'init', '-i', 'messages.pot',
++                       '-d', 'app/translations', '-l', lang]).returncode:
+         raise RuntimeError('init command failed')
+     os.remove('messages.pot')
+ 
+@@ -26,9 +31,11 @@ def init(lang):
+ @translate.command()
+ def update():
+     """Update all languages."""
+-    if os.system('pybabel extract -F babel.cfg -k _l -o messages.pot .'):
++    if subprocess.run(['pybabel', 'extract', '-F', 'babel.cfg', '-k', '_l',
++                       '-o', 'messages.pot', '.']).returncode:
+         raise RuntimeError('extract command failed')
+-    if os.system('pybabel update -i messages.pot -d app/translations'):
++    if subprocess.run(['pybabel', 'update', '-i', 'messages.pot',
++                       '-d', 'app/translations']).returncode:
+         raise RuntimeError('update command failed')
+     os.remove('messages.pot')
+ 
+@@ -36,5 +43,5 @@ def update():
+ @translate.command()
+ def compile():
+     """Compile all languages."""
+-    if os.system('pybabel compile -d app/translations'):
++    if subprocess.run(['pybabel', 'compile', '-d', 'app/translations']).returncode:
+         raise RuntimeError('compile command failed')
+diff --git a/app/models.py b/app/models.py
+index db447d8..ae44c66 100644
+--- a/app/models.py
++++ b/app/models.py
+@@ -138,7 +138,9 @@ class User(PaginatedAPIMixin, UserMixin, db.Model):
+         return check_password_hash(self.password_hash, password)
+ 
+     def avatar(self, size):
+-        digest = md5(self.email.lower().encode('utf-8')).hexdigest()
++        # MD5 solo se usa como identificador de Gravatar, no con fines criptograficos
++        digest = md5(self.email.lower().encode('utf-8'),
++                     usedforsecurity=False).hexdigest()
+         return f'https://www.gravatar.com/avatar/{digest}?d=identicon&s={size}'
+ 
+     def follow(self, user):
+diff --git a/config.py b/config.py
+index 7e50c9e..3496e07 100644
+--- a/config.py
++++ b/config.py
+@@ -1,4 +1,5 @@
+ import os
++import secrets
+ from dotenv import load_dotenv
+ 
+ basedir = os.path.abspath(os.path.dirname(__file__))
+@@ -6,7 +7,9 @@ load_dotenv(os.path.join(basedir, '.env'))
+ 
+ 
+ class Config:
+-    SECRET_KEY = os.environ.get('SECRET_KEY') or 'you-will-never-guess'
++    # Si no se define SECRET_KEY en el entorno se genera una aleatoria (no hay clave publica por defecto).
++    # En produccion con varios procesos DEBE definirse SECRET_KEY como variable de entorno.
++    SECRET_KEY = os.environ.get('SECRET_KEY') or secrets.token_hex(32)
+     SERVER_NAME = os.environ.get('SERVER_NAME')
+     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL', '').replace(
+         'postgres://', 'postgresql://') or \
